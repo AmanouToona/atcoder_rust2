@@ -23,6 +23,10 @@ fn main() {
             r_a += 1;
         }
 
+        if count_a < A {
+            break;
+        }
+
         // [l, r)
         while r_b <= l || (count_b < B && r_b < N) {
             if S[r_b] == 'b' {
@@ -31,13 +35,10 @@ fn main() {
             r_b += 1;
         }
 
-        if r_a == N && count_a < A {
-            r_a += 1;
-        }
-
         if r_b == N && count_b < B {
             r_b += 1;
         }
+
         ans += r_b.saturating_sub(r_a) as i64;
 
         if S[l] == 'a' {
