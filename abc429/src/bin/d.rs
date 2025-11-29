@@ -33,17 +33,14 @@ fn main() {
         sum -= v.1;
     }
 
+    // pre_ans までの区間の解は同じなので
     let mut ans = 0;
-    for i in 0..pre_ans.len() {
-        if i == 0 {
-            ans += pre_ans[i].0 * pre_ans[i].1;
-        } else {
-            let from = pre_ans[i - 1];
-            let to = pre_ans[i];
-            ans += from.1 * (to.0 - from.0);
-        }
+    for i in 1..pre_ans.len() {
+        let from = pre_ans[i - 1];
+        let to = pre_ans[i];
+        ans += from.1 * (to.0 - from.0);
     }
-    ans += (M - pre_ans.last().unwrap().0) * pre_ans.last().unwrap().1;
+    ans += (pre_ans[0].0 + M - pre_ans.last().unwrap().0) * pre_ans.last().unwrap().1;
 
     println!("{ans}");
 }
