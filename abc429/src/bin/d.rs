@@ -33,14 +33,17 @@ fn main() {
         sum -= v.1;
     }
 
-    // pre_ans までの区間の解は同じなので
+    // 最初に見た人が pre_ans.0 の場合 と考えて処理
     let mut ans = 0;
-    for i in 1..pre_ans.len() {
-        let from = pre_ans[i - 1];
-        let to = pre_ans[i];
-        ans += from.1 * (to.0 - from.0);
+    for i in 0..pre_ans.len() {
+        let u = i;
+        let v = (u + 1) % pre_ans.len(); // 最初に見た人
+
+        let d = (pre_ans[v].0 + M - pre_ans[u].0) % M;
+        let d = if d == 0 { M } else { d };
+        let e = pre_ans[v].1;
+        ans += d * pre_ans[v].1;
     }
-    ans += (pre_ans[0].0 + M - pre_ans.last().unwrap().0) * pre_ans.last().unwrap().1;
 
     println!("{ans}");
 }
