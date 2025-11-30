@@ -17,27 +17,33 @@ fn main() {
     }
 
     let mut q = VecDeque::new();
-    let mut dist: Vec<Vec<usize>> = vec![Vec::new(); N];
+    let mut dist: Vec<Vec<(usize, usize)>> = vec![Vec::new(); N];
     for (i, s) in S.iter().enumerate() {
         if *s == 'S' {
-            q.push_back((i, 0));
-            dist[i].push(0);
+            q.push_back((i, 0, i)); // u, dist, root
+            dist[i].push((0, i)); // dist, root
         }
     }
 
-    while let Some((u, d)) = q.pop_front() {
+    while let Some((u, d, r)) = q.pop_front() {
         for v in g[u].iter() {
             if dist[*v].len() >= 2 {
                 continue;
             }
-            dist[*v].push(d + 1);
-            q.push_back((*v, d + 1));
+            if let Some(&(_, i)) = dist[*v].first() {
+                if i == r {
+                    continue;
+                }
+            }
+
+            dist[*v].push((d + 1, r));
+            q.push_back((*v, d + 1, r));
         }
     }
 
     for (i, &s) in S.iter().enumerate() {
         if s == 'D' {
-            let d: usize = dist[i].iter().sum();
+            let d: usize = dist[i].iter().map(|x| x.0).sum();
             println!("{d}");
         }
     }
