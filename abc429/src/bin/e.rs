@@ -18,11 +18,10 @@ fn main() {
 
     let mut q = VecDeque::new();
     let mut dist: Vec<Vec<(usize, usize)>> = vec![Vec::new(); N];
-    for (i, s) in S.iter().enumerate() {
-        if *s == 'S' {
-            q.push_back((i, 0, i)); // u, dist, root
-            dist[i].push((0, i)); // dist, root
-        }
+
+    for (i, _) in S.iter().enumerate().filter(|&(_, s)| *s == 'S') {
+        q.push_back((i, 0, i)); // u, dist, root
+        dist[i].push((0, i)); // dist, root
     }
 
     while let Some((u, d, r)) = q.pop_front() {
@@ -30,10 +29,9 @@ fn main() {
             if dist[*v].len() >= 2 {
                 continue;
             }
-            if let Some(&(_, i)) = dist[*v].first() {
-                if i == r {
-                    continue;
-                }
+
+            if dist[*v].iter().any(|&(_, i)| i == r) {
+                continue;
             }
 
             dist[*v].push((d + 1, r));
@@ -41,10 +39,8 @@ fn main() {
         }
     }
 
-    for (i, &s) in S.iter().enumerate() {
-        if s == 'D' {
-            let d: usize = dist[i].iter().map(|x| x.0).sum();
-            println!("{d}");
-        }
+    for (i, _) in S.iter().enumerate().filter(|&(_, s)| *s == 'D') {
+        let d: usize = dist[i].iter().map(|x| x.0).sum();
+        println!("{d}");
     }
 }
