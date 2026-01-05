@@ -17,7 +17,7 @@ fn main() {
         let _ = *map.entry(b).or_insert(len);
     }
 
-    AB.sort_by(|x, y| x.1.cmp(&y.1));
+    AB.sort_by(|x, y| y.1.cmp(&x.1));
     AB.sort_by(|x, y| x.0.cmp(&y.0));
 
     let new_b: Vec<usize> = AB.iter().map(|x| *map.get(&x.1).unwrap()).collect();
@@ -31,6 +31,10 @@ fn main() {
 
         if dp.last().unwrap() < &b {
             dp.push(b);
+            continue;
+        }
+
+        if dp.last().unwrap() == &b {
             continue;
         }
 
