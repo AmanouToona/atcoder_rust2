@@ -1,5 +1,4 @@
 use proconio::input;
-use std::collections::HashMap;
 
 #[allow(non_snake_case)]
 fn main() {
@@ -8,49 +7,19 @@ fn main() {
         mut AB: [(usize, usize); N]
     }
 
-    let mut B: Vec<usize> = AB.iter().map(|x| x.1).collect();
-    B.sort();
+    AB.sort_by(|a, b| a.0.cmp(&b.0).then(b.1.cmp(&a.1)));
 
-    let mut map: HashMap<usize, usize> = HashMap::new();
-    for &b in B.iter() {
-        let len = map.len();
-        let _ = *map.entry(b).or_insert(len);
-    }
+    let seq: Vec<usize> = AB.iter().map(|x| x.1).collect();
 
-    AB.sort_by(|x, y| y.1.cmp(&x.1));
-    AB.sort_by(|x, y| x.0.cmp(&y.0));
-
-    let new_b: Vec<usize> = AB.iter().map(|x| *map.get(&x.1).unwrap()).collect();
-
-    let mut dp = vec![usize::MAX];
-    for &b in new_b.iter() {
-        if dp[0] > b {
-            dp[0] = b;
-            continue;
+    // LIS
+    let mut dp = Vec::new();
+    for b in seq.iter() {
+        let pos = dp.binary_search(b).unwrap_or_else(|x| x);
+        if pos < dp.len() {
+            dp[pos] = *b;
+        } else {
+            dp.push(*b);
         }
-
-        if dp.last().unwrap() < &b {
-            dp.push(b);
-            continue;
-        }
-
-        if dp.last().unwrap() == &b {
-            continue;
-        }
-
-        let mut left = 0;
-        let mut right = dp.len();
-
-        while right - left > 1 {
-            let mid = (right + left) / 2;
-
-            if dp[mid] < b {
-                left = mid;
-            } else {
-                right = mid;
-            }
-        }
-        dp[right] = b;
     }
 
     println!("{}", dp.len());
