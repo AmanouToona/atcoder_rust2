@@ -20,15 +20,10 @@ fn main() {
 
         let mut sum: usize = cost.iter().take(W).sum();
         let mut ans = sum;
-        for i in W..4 * W {
-            let left = i - W;
-            sum -= cost[left];
-            sum += cost[i];
-
+        for (left, right) in cost.iter().zip(cost.iter().skip(W)) {
+            sum = sum + right - left;
             ans = ans.min(sum);
         }
-
-        // println!("{:?}", cost);
         println!("{ans}");
     }
 }
