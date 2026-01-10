@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug binary (prompt) - integrated terminal (stdin enabled)",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/target/debug/${input:binaryName}",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "stopOnEntry": false,
+            "terminal": "integrated",
+            "sourceLanguages": [
+                "rust"
+            ]
+        }
+    ],
+    "inputs": [
+        {
+            "id": "binaryName",
+            "type": "promptString",
+            "default": ""
+        }
+    ]
+}
