@@ -11,7 +11,7 @@ fn main() {
 
     let mut ans = N - K;
     let mut sum = 0;
-    for &s in sake.iter() {
+    for &s in sake.iter().rev() {
         sum += s;
         ans += 1;
         if sum >= X {
