@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use proconio::input;
-
+#[allow(non_snake_case)]
 fn dfs(
     u: usize,
     ans: &mut Vec<usize>,
@@ -8,10 +8,9 @@ fn dfs(
     cost: usize,
     S: usize,
     T: usize,
-    L: usize,
-    cnt: usize,
+    lest: usize,
 ) {
-    if cnt == L {
+    if lest == 0 {
         if cost >= S && cost <= T {
             ans.push(u);
         }
@@ -19,7 +18,7 @@ fn dfs(
     }
 
     for &(v, c) in g[u].iter() {
-        dfs(v, ans, g, cost + c, S, T, L, cnt + 1);
+        dfs(v, ans, g, cost + c, S, T, lest - 1);
     }
 }
 
@@ -39,11 +38,11 @@ fn main() {
     }
 
     let mut ans = Vec::new();
-    dfs(0, &mut ans, &g, 0, S, T, L, 0);
+    dfs(0, &mut ans, &g, 0, S, T, L);
 
     ans.sort();
     ans.dedup();
-    let ans : String = ans.iter().map(|x| x + 1).join(" ");
+    let ans: String = ans.iter().map(|x| x + 1).join(" ");
 
     println!("{ans}");
 }
