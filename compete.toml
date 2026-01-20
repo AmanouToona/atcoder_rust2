@@ -22,8 +22,8 @@ test-suite = "{{ manifest_dir }}/testcases/{{ bin_alias }}.yml"
 
 [template]
 src = '''
+#![allow(non_snake_case)]
 use proconio::input;
-#[allow(non_snake_case)]
 fn main() {
     input!{}
 }
