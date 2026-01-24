@@ -50,7 +50,7 @@ fn main() {
     let mut l = 0;
     for (i, &j) in vec.iter().enumerate().skip(1) {
         let u = vec[i - 1];
-        if j.1 * u.2 != j.2 * u.1 {
+        if j.1 * u.2 != j.2 * u.1 || !(j.1 * u.1 >= 0 && j.2 * u.2 >= 0) {
             l = i
         }
         left[i] = l;
@@ -60,12 +60,11 @@ fn main() {
     let mut r = N - 1;
     for (i, &j) in vec.iter().enumerate().rev().skip(1) {
         let u = vec[i + 1];
-        if j.1 * u.2 != j.2 * u.1 {
+        if j.1 * u.2 != j.2 * u.1 || !(j.1 * u.1 >= 0 && j.2 * u.2 >= 0) {
             r = i
         }
         right[i] = r;
     }
-    // println!("{:?}", vec);
     eprintln!("{:?}", left);
     eprintln!("{:?}", right);
 
