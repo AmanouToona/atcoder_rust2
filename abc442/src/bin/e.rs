@@ -1,5 +1,6 @@
 #![allow(non_snake_case)]
 use proconio::input;
+use std::cmp::Ordering;
 fn main() {
     input! {
         (N, Q): (usize, usize),
@@ -7,66 +8,58 @@ fn main() {
         AB: [(usize, usize); Q],
     }
 
-    let mut v0 = Vec::new();
-    let mut v1 = Vec::new();
-    let mut v2 = Vec::new();
-    let mut v3 = Vec::new();
-
-    for (i, &(x, y)) in XY.iter().enumerate() {
-        if x >= 0 {
-            if y >= 0 {
-                v0.push((i, x, y));
-            } else {
-                v1.push((i, x, y));
-            }
-        } else {
-            if y <= 0 {
-                v2.push((i, x, y));
-            } else {
-                v3.push((i, x, y));
-            }
-        }
-    }
-
-    v0.sort_by(|&x, &y| (x.1 * y.2).cmp(&(x.2 * y.1)));
-    v1.sort_by(|&x, &y| (x.1 * y.2).cmp(&(x.2 * y.1)));
-    v2.sort_by(|&x, &y| (x.1 * y.2).cmp(&(x.2 * y.1)));
-    v3.sort_by(|&x, &y| (x.1 * y.2).cmp(&(x.2 * y.1)));
-
-    let vec: Vec<(usize, i64, i64)> = v0
+    let mut points: Vec<(usize, i64, i64)> = XY
         .iter()
-        .chain(v1.iter())
-        .chain(v2.iter())
-        .chain(v3.iter())
         .cloned()
+        .enumerate()
+        .map(|(i, (x, y))| (i, x, y))
         .collect();
 
+    let cmp = |&x: &(i64, i64), &y: &(i64, i64)| -> Ordering {
+        let ah = if (x.0 >= 0 && x.1 >= 0) || (x.0 > 0 && x.1 <= 0) {
+            0
+        } else {
+            1
+        };
+        let bh = if (y.0 >= 0 && y.1 >= 0) || (y.0 > 0 && y.1 <= 0) {
+            0
+        } else {
+            1
+        };
+
+        if ah != bh {
+            return ah.cmp(&bh);
+        }
+
+        (x.0 * y.1).cmp(&(x.1 * y.0))
+    };
+
+    points.sort_by(|&x, &y| cmp(&(x.1, x.2), &(y.1, y.2)));
+
     let mut pos = vec![0; N];
-    for (i, &j) in vec.iter().enumerate() {
-        pos[j.0] = i
+    for (i, j) in points.iter().enumerate() {
+        pos[j.0] = i;
     }
 
     let mut left = vec![0; N];
-    let mut l = 0;
-    for (i, &j) in vec.iter().enumerate().skip(1) {
-        let u = vec[i - 1];
-        if j.1 * u.2 != j.2 * u.1 || !(j.1 * u.1 >= 0 && j.2 * u.2 >= 0) {
-            l = i
+    for (i, &v) in points.iter().enumerate().skip(1) {
+        let u = points[i - 1];
+        if cmp(&(u.1, u.2), &(v.1, v.2)) != Ordering::Equal {
+            left[i] = i;
+        } else {
+            left[i] = left[i - 1]
         }
-        left[i] = l;
     }
 
     let mut right = vec![N - 1; N];
-    let mut r = N - 1;
-    for (i, &j) in vec.iter().enumerate().rev().skip(1) {
-        let u = vec[i + 1];
-        if j.1 * u.2 != j.2 * u.1 || !(j.1 * u.1 >= 0 && j.2 * u.2 >= 0) {
-            r = i
+    for (i, &v) in points.iter().enumerate().rev().skip(1) {
+        let u = points[i + 1];
+        if cmp(&(u.1, u.2), &(v.1, v.2)) != Ordering::Equal {
+            right[i] = i;
+        } else {
+            right[i] = right[i + 1];
         }
-        right[i] = r;
     }
-    eprintln!("{:?}", left);
-    eprintln!("{:?}", right);
 
     for &(a, b) in AB.iter() {
         let a = a - 1;
@@ -78,7 +71,7 @@ fn main() {
             let ans = pos_v - pos_u + 1;
             println!("{ans}")
         } else {
-            let ans = pos_v + 1 + vec.len() - pos_u;
+            let ans = pos_v + 1 + pos.len() - pos_u;
             println!("{ans}")
         }
     }
