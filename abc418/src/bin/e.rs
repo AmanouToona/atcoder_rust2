@@ -3,11 +3,8 @@ use proconio::input;
 use std::collections::HashMap;
 
 fn euclid(x: i64, y: i64) -> i64 {
-    if x == 0 || y == 0 {
-        return 1;
-    }
-    if x < y {
-        return euclid(y, x);
+    if y == 0 {
+        return x;
     }
     if x % y == 0 {
         return y;
@@ -37,11 +34,6 @@ fn main() {
 
             let e = euclid(x_diff.abs(), y_diff.abs());
             let (mut x, mut y) = (x_diff / e, y_diff / e);
-            if x == 0 {
-                y = 1;
-            } else if y == 0 {
-                x = 1;
-            }
 
             if x < 0 {
                 x *= -1;
