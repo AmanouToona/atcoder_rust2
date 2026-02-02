@@ -1,30 +1,31 @@
 #![allow(non_snake_case)]
 use itertools::Itertools;
 use proconio::input;
+
 fn dfs(
+    u: usize,
+    goal: usize,
+    seen: &mut Vec<bool>,
+    path: &mut Vec<usize>,
     g: &Vec<Vec<usize>>,
-    from: usize,
-    to: usize,
-    q: &mut Vec<usize>,
-    ans: &mut Vec<usize>,
-    used: &mut Vec<bool>,
-) {
-    if !ans.is_empty() {
-        return;
+) -> bool {
+    path.push(u);
+    seen[u] = true;
+
+    if u == goal {
+        return true;
     }
-    if from == to {
-        *ans = (*q).clone();
-        return;
-    }
-    for &nxt in g[from].iter() {
-        if used[nxt] {
+
+    for &nxt in g[u].iter() {
+        if seen[nxt] {
             continue;
         }
-        q.push(nxt);
-        used[nxt] = true;
-        dfs(g, nxt, to, q, ans, used);
-        q.pop();
+        if dfs(nxt, goal, seen, path, g) {
+            return true;
+        }
     }
+    path.pop();
+    false
 }
 
 fn main() {
@@ -45,14 +46,12 @@ fn main() {
             i.sort();
         }
 
-        let mut ans = Vec::new();
-        let mut q = Vec::new();
-        let mut used = vec![false; N];
-        q.push(X - 1);
-        used[X - 1] = true;
-        dfs(&g, X - 1, Y - 1, &mut q, &mut ans, &mut used);
+        let mut path = Vec::new();
+        let mut seen = vec![false; N];
 
-        let ans: String = ans.iter().map(|x| *x + 1).join(" ");
+        dfs(X - 1, Y - 1, &mut seen, &mut path, &g);
+
+        let ans: String = path.iter().map(|x| *x + 1).join(" ");
         println!("{ans}");
     }
 }
