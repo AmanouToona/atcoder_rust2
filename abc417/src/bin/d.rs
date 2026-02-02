@@ -35,29 +35,18 @@ fn main() {
     for _ in 0..Q {
         input! {x: usize}
 
-        if x >= minus[N] + 1000 {
-            println!("{}", x - minus[N]);
-            continue;
-        }
-
         if x <= 1000 {
             let ans = dfs(0, x, &mut dp, &PAB);
             println!("{ans}");
             continue;
         }
 
-        let mut left = 0;
-        let mut right = N;
-        while right - left > 1 {
-            let mid = (left + right) / 2;
-            if minus[mid] > x - 1000 {
-                right = mid;
-            } else {
-                left = mid;
-            }
+        let i = minus.partition_point(|&v| v < (x - 1000));
+        if i == minus.len() {
+            println!("{}", x - minus[N]);
+            continue;
         }
-
-        let ans = dfs(right, x - minus[right], &mut dp, &PAB);
+        let ans = dfs(i, x - minus[i], &mut dp, &PAB);
         println!("{ans}");
     }
 }
