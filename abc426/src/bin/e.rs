@@ -1,16 +1,55 @@
 #![allow(non_snake_case)]
 use proconio::input;
 
-fn distance(t: (f64, f64), a: (f64, f64)) -> f64 {
-    ((t.0 - a.0).powf(2.) + (t.1 - a.1).powf(2.)).sqrt()
+fn cross(a: (f64, f64), b: (f64, f64)) -> f64 {
+    a.0 * b.1 - a.1 * b.0
 }
 
-fn get_position(s: (f64, f64), g: (f64, f64), t: f64) -> (f64, f64) {
-    let d = ((g.0 - s.0).powf(2.) + (g.1 - s.1).powf(2.)).sqrt();
-    let x = s.0 + (g.0 - s.0) / d * t.min(d);
-    let y = s.1 + (g.1 - s.1) / d * t.min(d);
+fn dot(a: (f64, f64), b: (f64, f64)) -> f64 {
+    a.0 * b.0 + a.1 * b.1
+}
 
-    (x, y)
+fn sub(a: (f64, f64), b: (f64, f64)) -> (f64, f64) {
+    (a.0 - b.0, a.1 - b.1)
+}
+
+fn add(a: (f64, f64), b: (f64, f64)) -> (f64, f64) {
+    (a.0 + b.0, a.1 + b.1)
+}
+
+fn times(a: (f64, f64), p: f64) -> (f64, f64) {
+    (a.0 * p, a.1 * p)
+}
+
+fn norm(a: (f64, f64)) -> f64 {
+    (a.0.powi(2) + a.1.powi(2)).sqrt()
+}
+
+fn distance(a: (f64, f64), b: (f64, f64)) -> f64 {
+    norm(sub(a, b))
+}
+
+fn distance_line_dot(a: (f64, f64), b: (f64, f64), p: (f64, f64)) -> f64 {
+    if a.0 == b.0 && a.1 == b.1 {
+        return distance(a, p);
+    }
+
+    let ab = sub(b, a);
+    let ap = sub(p, a);
+    let ba = sub(a, b);
+    let bp = sub(p, b);
+
+    if dot(ap, ab) < 0. {
+        // 線分の端点aが最短
+        return distance(a, p);
+    }
+    if dot(bp, ba) < 0. {
+        return distance(b, p);
+    }
+
+    // 線分への垂線が最短距離
+    let s = (cross(ab, ap) / 2.).abs();
+    s / distance(a, b) * 2.
 }
 
 fn main() {
@@ -20,33 +59,30 @@ fn main() {
 
     for _ in 0..T {
         input! {
-            (Tsx, Tsy, Tgx, Tgy): (f64, f64, f64, f64),
-            (Asx, Asy, Agx, Agy): (f64, f64, f64, f64),
+            (mut Ts, mut Tg): ((f64, f64), (f64, f64)),
+            (mut As, mut Ag): ((f64, f64), (f64, f64)),
         }
 
-        // 3分探索
-        let mut left = 0.;
-        let mut right = 300.;
-        // left c1 c2 right;
-        for _ in 0..500 {
-            let d = (right - left) / 3.;
-            let c1 = left + d;
-            let c2 = c1 + d;
-
-            let tc1 = get_position((Tsx, Tsy), (Tgx, Tgy), c1);
-            let ac1 = get_position((Asx, Asy), (Agx, Agy), c1);
-            let tc2 = get_position((Tsx, Tsy), (Tgx, Tgy), c2);
-            let ac2 = get_position((Asx, Asy), (Agx, Agy), c2);
-
-            if distance(tc1, ac1) > distance(tc2, ac2) {
-                left = c1;
-            } else {
-                right = c2;
-            }
+        if distance(Ts, Tg) < distance(As, Ag) {
+            std::mem::swap(&mut Ts, &mut As);
+            std::mem::swap(&mut Tg, &mut Ag);
         }
-        let tp = get_position((Tsx, Tsy), (Tgx, Tgy), left);
-        let ap = get_position((Asx, Asy), (Agx, Agy), left);
-        let ans = distance(tp, ap);
+
+        let T = sub(Tg, Ts);
+        let A = sub(Ag, As);
+        // phase1
+        // 原点から線分への距離
+        let T_split: (f64, f64) = times(T, distance(As, Ag) / distance(Ts, Tg));
+        let S = sub(Ts, As);
+        let G = sub(add(Ts, T_split), Ag);
+        let mut ans = distance_line_dot(S, G, (0., 0.));
+
+        // phase2
+        // Ag から線分への距離
+        let S = add(Ts, T_split);
+        let G = Tg;
+        ans = ans.min(distance_line_dot(S, G, Ag));
+
         println!("{ans}");
     }
 }
