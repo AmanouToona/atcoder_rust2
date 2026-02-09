@@ -8,12 +8,12 @@ fn main() {
     let mut ans = 0;
 
     for i in 1..=N {
-        let i: usize = i
-            .to_string()
+        if i.to_string()
             .chars()
-            .map(|char| char.to_digit(10).unwrap() as usize)
-            .sum();
-        if i == K {
+            .map(|x| x.to_digit(10).unwrap() as usize)
+            .sum::<usize>()
+            == K
+        {
             ans += 1;
         }
     }

@@ -1,13 +1,14 @@
 use proconio::input;
+use proconio::marker::Chars;
 #[allow(non_snake_case)]
 fn main() {
     input! {
-        N: usize
+        N: Chars,
     }
 
-    if (N / 100 == (N % 100) / 10) && (N % 100) / 10 == (N % 10) {
+    if N[0] == N[1] && N[1] == N[2] {
         println!("Yes");
     } else {
-        println!("No")
+        println!("No");
     }
 }
