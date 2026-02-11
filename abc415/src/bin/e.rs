@@ -1,15 +1,12 @@
 #![allow(non_snake_case)]
 use proconio::input;
-fn main() {
-    input! {
-        (H, W): (usize, usize),
-        A: [[i64; W]; H],
-        P: [i64; H + W - 1],
-    }
 
+fn can_reach(x: i64, A: &[Vec<i64>], P: &[i64]) -> bool {
+    let H = A.len();
+    let W = A[0].len();
     let INF: i64 = 1_000_000_000_000_000;
-    let mut dp = vec![vec![(-INF, -INF); W]; H];
-    dp[0][0] = (A[0][0] - P[0], A[0][0] - P[0]);
+    let mut dp = vec![vec![-INF; W]; H];
+    dp[0][0] = A[0][0] + x - P[0];
 
     for h in 0..H {
         for w in 0..W {
@@ -19,21 +16,44 @@ fn main() {
                 if vh >= H || vw >= W {
                     continue;
                 }
+                if dp[h][w] < 0 {
+                    continue;
+                }
 
                 let day = vh + vw;
-                let nxt_day_has = dp[h][w].0 + A[vh][vw] - P[day];
-                let nxt_state = (nxt_day_has, dp[h][w].1.min(nxt_day_has));
-
-                if nxt_state.1 > dp[vh][vw].1
-                    || (nxt_state.1 == dp[vh][vw].1 && nxt_state.0 > dp[vh][vw].0)
-                    || nxt_state.1 >= 0 && nxt_state.0 > dp[vh][vw].0
-                {
-                    dp[vh][vw] = nxt_state;
-                }
+                dp[vh][vw] = dp[vh][vw].max(dp[h][w] + A[vh][vw] - P[day]);
             }
         }
     }
 
-    let ans = -dp[H - 1][W - 1].1.min(0);
-    println!("{ans}");
+    dp[H - 1][W - 1] >= 0
+}
+
+fn main() {
+    input! {
+        (H, W): (usize, usize),
+        A: [[i64; W]; H],
+        P: [i64; H + W - 1],
+    }
+
+    if can_reach(0, &A, &P) {
+        println!("0");
+        return;
+    }
+
+    let INF: i64 = 1_000_000_000_000_000;
+    let mut left = 0;
+    let mut right = INF;
+
+    can_reach(20, &A, &P);
+
+    while right - left > 1 {
+        let mid = (right + left) / 2;
+        if can_reach(mid, &A, &P) {
+            right = mid;
+        } else {
+            left = mid;
+        }
+    }
+    println!("{right}");
 }
