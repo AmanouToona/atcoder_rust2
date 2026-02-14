@@ -98,9 +98,11 @@ fn main() {
                     ans = ans.max((r + 1).wrapping_sub(lr));
                 }
                 // 全域の処理
-                let (&l, _) = l2r.range(l..).next().unwrap();
-                let (&r, _) = l2r.range(..r).next_back().unwrap();
-                ans = ans.max(length.prod(l..r));
+                if let Some((&l, _)) = l2r.range(l..=r).next() {
+                    if let Some((&r, _)) = l2r.range(l..=r).next_back() {
+                        ans = ans.max(length.prod(l..r));
+                    }
+                }
 
                 println!("{ans}");
             }
