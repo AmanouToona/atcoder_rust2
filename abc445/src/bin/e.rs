@@ -3,36 +3,27 @@ use itertools::Itertools;
 use proconio::input;
 use std::collections::HashMap;
 #[allow(non_snake_case)]
-fn eratosthenes(n: usize) -> Vec<usize> {
-    if n < 2 {
-        return Vec::new();
-    }
-
-    let mut res = Vec::new();
-    let mut is_prime = vec![true; n + 1];
-    is_prime[0] = false;
-    is_prime[1] = false;
-
-    for i in 2..=n {
-        if !is_prime[i] {
-            continue;
+fn make_spf(n: usize) -> Vec<usize> {
+    let mut res: Vec<usize> = (0..=n).collect();
+    let mut i = 2;
+    while i * i <= n {
+        if res[i] == i {
+            for j in (i * i..=n).step_by(i) {
+                if res[j] == j {
+                    res[j] = i;
+                }
+            }
         }
-        res.push(i);
-
-        let mut j = i;
-        while j + i <= n {
-            is_prime[j + i] = false;
-            j += i;
-        }
+        i += 1;
     }
-
     res
 }
 
 #[allow(non_snake_case)]
 fn main() {
     input! {T: usize}
-    let primes = eratosthenes(10_000_000);
+    // let primes = eratosthenes(10_000_000);
+    let spf = make_spf(10_000_000);
     for _ in 0..T {
         input! {
             N: usize,
@@ -44,13 +35,14 @@ fn main() {
         for (i, &a) in A.iter().enumerate() {
             let mut muta = a;
 
-            for &p in primes.iter() {
-                let mut cnt = 0;
-                while muta >= p && muta % p == 0 {
-                    cnt += 1;
-                    muta /= p;
-                }
+            while muta > 1 {
+                let p = spf[muta];
 
+                let mut cnt = 0;
+                while muta % p == 0 {
+                    muta /= p;
+                    cnt += 1;
+                }
                 if cnt != 0 {
                     a_primes[i].push((p, cnt));
                     let u = primes_cnt.entry(p).or_default();
