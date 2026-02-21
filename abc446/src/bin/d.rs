@@ -10,18 +10,12 @@ fn main() {
     let mut map: HashMap<usize, usize> = HashMap::new();
 
     for &a in A.iter() {
-        if map.contains_key(&(a - 1)) {
-            let now = *map.entry(a).or_insert(1);
-            let new = now.max(*map.get(&(a - 1)).unwrap() + 1);
-            *map.entry(a).or_default() = new;
-        } else {
-            let now = *map.entry(a).or_insert(1);
-        }
-    }
-    let mut ans = 0;
-    for (&k, &v) in map.iter() {
-        ans = ans.max(v);
+        let &pre = map.get(&(a - 1)).unwrap_or(&0);
+        map.entry(a)
+            .and_modify(|x| *x = (*x).max(pre + 1))
+            .or_insert(pre + 1);
     }
 
+    let ans = map.values().fold(0, |acc, x| acc.max(*x));
     println!("{ans}");
 }

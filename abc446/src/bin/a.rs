@@ -9,13 +9,7 @@ fn main() {
 
     let ans: String = "Of"
         .chars()
-        .chain(S.iter().cloned().map(|x| {
-            if x.is_uppercase() {
-                x.to_ascii_lowercase()
-            } else {
-                x
-            }
-        }))
+        .chain(S.iter().flat_map(|x| x.to_lowercase()))
         .join("");
     println!("{ans}");
 }
