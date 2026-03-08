@@ -7,32 +7,36 @@ fn main() {
         cl :[(usize, usize); K],
     }
 
-    //　完全に間違っている 発想が違う
-    let mo: usize = 10007;
-    Mint::set_modulus(mo as u32);
+    let modulo = 10007;
+    Mint::set_modulus((M * modulo) as u32);
 
-    let mut doubling = [Mint::new(0); 30];
-    doubling[0] = Mint::new(10);
-    for i in 1..doubling.len() {
-        doubling[i] = doubling[i - 1] * doubling[i - 1];
+    //  pow[k] = 10 ** (k + 1);
+    let mut pow = [Mint::new(0); 30];
+    pow[0] = Mint::new(10);
+    for i in 0..pow.len() - 1 {
+        pow[i + 1] = pow[i] * pow[i];
     }
 
-    let mut now = Mint::new(0);
+    // ones[k] = 1 k digit;
+    let mut ones = [Mint::new(1); 30];
+    for i in 1..ones.len() {
+        ones[i] = ones[i - 1] * pow[i - 1] + ones[i - 1];
+    }
 
+    // N = MBQ + X
+    let mut x = Mint::new(0);
     for &(c, l) in cl.iter() {
         let mut digit = Mint::new(1);
-        for d in 0..=30 {
-            if (l >> d) & 1 == 1 {
-                digit *= doubling[d];
+        let mut one = Mint::new(0);
+        for (i, (&p, &o)) in pow.iter().zip(ones.iter()).enumerate() {
+            if l >> i & 1 == 1 {
+                digit *= p;
+                one = one * p + o;
             }
         }
-        now *= digit;
-        now += Mint::new(c) * (digit - Mint::new(1)) / Mint::new(9);
-        eprintln!("{now}");
+        x = x * digit + one * Mint::new(c);
     }
 
-    let n = now.val() as usize * mo * mo;
-    eprintln!("n {n}");
-    let ans = (n / M) % mo;
+    let ans = (x.val() as usize / M) % modulo;
     println!("{ans}");
 }
