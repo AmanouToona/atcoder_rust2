@@ -70,18 +70,7 @@ fn main() {
             if (x - len).div_ceil(tail_len) <= cnt2 - cnt {
                 let j = (x - 1 - len) % tail_len;
                 // tail ないの j 番目の要素
-                let mut l = M;
-                let mut r = 0;
-
-                while l - r > 1 {
-                    let mid = (l + r) / 2;
-                    if tail.prod(..=mid) > j {
-                        l = mid;
-                    } else {
-                        r = mid;
-                    }
-                }
-                ans[idx] = l;
+                ans[idx] = tail.max_right(0, |&sum| sum <= j);
 
                 i += 1;
             } else {
