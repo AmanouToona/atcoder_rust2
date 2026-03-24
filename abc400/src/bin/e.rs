@@ -35,19 +35,20 @@ fn main() {
     // n = (p ** k * q ** l) ** 2;
     let mut candidate: BTreeSet<usize> = BTreeSet::new();
     for (i, &p) in primes.iter().enumerate() {
-        let mut pk = p;
-        'outer2: for _ in 1..=40 {
+        let mut pk: usize = 1;
+        for _ in 1..=40 {
+            pk = pk.saturating_mul(p);
             if pk.saturating_mul(pk) > a_max {
                 break;
             }
+
             for &q in primes.iter().skip(i + 1) {
                 if (pk.saturating_mul(q)).saturating_mul(pk.saturating_mul(q)) > a_max {
-                    break 'outer2;
+                    break;
                 }
 
                 let mut ok = 1;
                 let mut ng = ((a_max / (pk * q)).sqrt() + 2) as u32;
-                let mut ng = 7;
                 while ng - ok > 1 {
                     let mid = (ng + ok) / 2;
 
@@ -64,11 +65,9 @@ fn main() {
                     candidate.insert((pk * q.pow(i)) * (pk * q.pow(i)));
                 }
             }
-            pk = pk.saturating_mul(p);
         }
     }
 
-    eprintln!("{}", candidate.len());
     for &a in A.iter() {
         let ans = candidate
             .range((Bound::Included(&1), Bound::Included(&a)))
@@ -76,6 +75,4 @@ fn main() {
             .unwrap();
         println!("{ans}");
     }
-
-    println!("{}", candidate.len());
 }
