@@ -13,19 +13,8 @@ fn main() {
             break;
         }
 
-        let mut ok = 1;
-        let mut ng = 10usize.pow(9) + 1;
-        while ng - ok > 1 {
-            let mid = (ok + ng) / 2;
-
-            if two_a.saturating_mul(mid).saturating_mul(mid) > N {
-                ng = mid;
-            } else {
-                ok = mid;
-            }
-        }
-
-        ans += ok.div_ceil(2);
+        let b_max = (N / two_a).isqrt();
+        ans += b_max.div_ceil(2);
     }
 
     println!("{ans}")
