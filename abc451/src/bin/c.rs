@@ -1,30 +1,25 @@
 #![allow(non_snake_case)]
 use proconio::input;
-use std::collections::BTreeMap;
+use std::cmp::Reverse;
+use std::collections::BinaryHeap;
 fn main() {
     input! {
-        Q: usize
+        Q: usize,
     }
 
-    let mut tot = 0;
-    let mut tree: BTreeMap<usize, usize> = BTreeMap::new();
-
+    let mut tree: BinaryHeap<Reverse<usize>> = BinaryHeap::new();
     for _ in 0..Q {
         input! {q: usize, h: usize}
         match q {
             1 => {
-                *tree.entry(h).or_default() += 1;
-                tot += 1;
+                tree.push(Reverse(h));
             }
             2 => {
-                let mut to_remove = Vec::new();
-                for (k, v) in tree.range(..=h) {
-                    tot -= *v;
-                    to_remove.push(*k);
-                }
-
-                for r in to_remove.iter() {
-                    tree.remove(r);
+                while let Some(&Reverse(t)) = tree.peek() {
+                    if t > h {
+                        break;
+                    }
+                    tree.pop();
                 }
             }
             _ => {
@@ -32,6 +27,6 @@ fn main() {
             }
         }
 
-        println!("{tot}");
+        println!("{}", tree.len());
     }
 }
