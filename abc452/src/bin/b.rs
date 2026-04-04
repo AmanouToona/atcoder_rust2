@@ -8,12 +8,10 @@ fn main() {
 
     let mut ans = vec![vec!['.'; W]; H];
 
-    for h in 0..H {
-        for w in 0..W {
-            if h == 0 || h == H - 1 {
-                ans[h][w] = '#';
-            } else if w == 0 || w == W - 1 {
-                ans[h][w] = '#';
+    for (h, ans) in ans.iter_mut().enumerate() {
+        for (w, ans) in ans.iter_mut().enumerate() {
+            if h == 0 || h == H - 1 || w == 0 || w == W - 1 {
+                *ans = '#';
             }
         }
     }

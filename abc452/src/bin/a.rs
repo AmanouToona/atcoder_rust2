@@ -5,15 +5,7 @@ fn main() {
         (M, D): (usize, usize)
     }
 
-    let is = match (M, D) {
-        (1, 7) => true,
-        (3, 3) => true,
-        (5, 5) => true,
-        (7, 7) => true,
-        (9, 9) => true,
-        _ => false,
-    };
-
+    let is = matches!((M, D), (1, 7) | (3, 3) | (5, 5) | (7, 7) | (9, 9));
     if is {
         println!("Yes");
     } else {
