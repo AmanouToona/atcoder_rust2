@@ -8,34 +8,31 @@ fn main() {
         B: [Mint; M],
     }
 
-    let mut ans = Mint::new(0);
+    let mut sum_i_ai = Mint::new(0);
+    for (i, &a) in (1..).zip(A.iter()) {
+        sum_i_ai += a * Mint::new(i);
+    }
 
-    let mut ai_sum = Mint::new(0);
+    // prefix sum
+    let mut pref_a = vec![Mint::new(0); N + 2];
     for (i, &a) in A.iter().enumerate() {
-        ai_sum += Mint::new(i + 1) * a;
+        pref_a[i + 2] = pref_a[i + 1] + a;
     }
 
-    for &b in B.iter() {
-        ans += b * ai_sum;
-    }
+    let mut ans = Mint::new(0);
+    for (j, &b) in (1..).zip(B.iter()) {
+        let mut sub_sum = Mint::new(0);
 
-    let mut cumsum = vec![Mint::new(0); N + 2];
-    for (i, a) in A.iter().enumerate() {
-        cumsum[i + 2] = *a;
-        let (i1, i2) = cumsum.split_at_mut(i + 2);
-        i2[0] += i1.last().unwrap();
-    }
+        let mut k = 1;
+        while k * j <= N {
+            let left = k * j;
+            let right = (N + 1).min((k + 1) * j);
+            sub_sum += (pref_a[right] - pref_a[left]) * Mint::new(k) * Mint::new(j);
 
-    for (j, b) in B.iter().enumerate() {
-        let j = j + 1; // 式を問題文に合わせるため
-        let mut aij = Mint::new(0);
-        let mut i = 1;
-        while i <= N {
-            let nxt = (N + 1).min((i / j + 1) * j);
-            aij += (cumsum[nxt] - cumsum[i]) * Mint::new(i / j) * Mint::new(j);
-            i = nxt;
+            k += 1;
         }
-        ans -= b * aij;
+
+        ans += b * (sum_i_ai - sub_sum);
     }
 
     println!("{ans}");
