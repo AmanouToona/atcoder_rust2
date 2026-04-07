@@ -2,7 +2,7 @@
 use ac_library::Dsu;
 use amplify::confinement::Collection;
 use proconio::input;
-use std::{collections::VecDeque, usize};
+use std::collections::VecDeque;
 
 // Lowest Common Ancestor
 struct LCA {
@@ -99,7 +99,7 @@ fn main() {
 
     let mut dsu = Dsu::new(N);
     let mut g: Vec<Vec<usize>> = vec![Vec::new(); N];
-    for (c, i, j) in edge.iter() {
+    for (_, i, j) in edge.iter() {
         if dsu.same(*i, *j) {
             continue;
         } else {
