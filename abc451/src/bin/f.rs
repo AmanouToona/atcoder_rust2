@@ -17,6 +17,10 @@ fn main() {
 
     let mut ans = 0;
     for (u, v) in uv.iter() {
+        if ans == -1 {
+            println!("{ans}");
+            continue;
+        }
         let mut u = u - 1;
         let mut v = v - 1;
 
@@ -43,7 +47,9 @@ fn main() {
 
             dsu.merge(root_u, root_v);
             let new_root = dsu.leader(root_u);
-            color[new_root] = color[root_u].clone();
+            if new_root != root_u {
+                color.swap(new_root, root_u);
+            }
 
             ans += color[new_root].iter().map(|x| x.len()).min().unwrap() as i64;
         }
