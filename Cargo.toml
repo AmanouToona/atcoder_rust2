@@ -1,3 +1,3 @@
 [workspace]
-members = ["abc*"]
+members = ["abc*", "arc*"]
 resolver = "2"
