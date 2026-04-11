@@ -8,71 +8,61 @@ fn main() {
         AB: [(usize, usize); Q],
     }
 
-    let mut points: Vec<(usize, i64, i64)> = XY
-        .iter()
-        .cloned()
-        .enumerate()
-        .map(|(i, (x, y))| (i, x, y))
-        .collect();
-
-    let cmp = |&x: &(i64, i64), &y: &(i64, i64)| -> Ordering {
-        let ah = if (x.0 >= 0 && x.1 >= 0) || (x.0 > 0 && x.1 <= 0) {
+    let cmp = |x: &(i64, i64), y: &(i64, i64)| -> Ordering {
+        let xh = if x.0 > 0 && x.1 >= 0 || (x.0 >= 0 && x.1 <= 0) {
             0
         } else {
             1
         };
-        let bh = if (y.0 >= 0 && y.1 >= 0) || (y.0 > 0 && y.1 <= 0) {
+        let yh = if y.0 > 0 && y.1 >= 0 || (y.0 >= 0 && y.1 <= 0) {
             0
         } else {
             1
         };
 
-        if ah != bh {
-            return ah.cmp(&bh);
-        }
+        if xh != yh {
+            return xh.cmp(&yh);
+        };
 
         (x.0 * y.1).cmp(&(x.1 * y.0))
     };
 
-    points.sort_by(|&x, &y| cmp(&(x.1, x.2), &(y.1, y.2)));
+    let mut xyi: Vec<(i64, i64, usize)> = XY
+        .iter()
+        .enumerate()
+        .map(|(i, xy)| (xy.0, xy.1, i))
+        .collect();
+    xyi.sort_by(|x, y| cmp(&(x.0, x.1), &(y.0, y.1)));
 
-    let mut pos = vec![0; N];
-    for (i, j) in points.iter().enumerate() {
-        pos[j.0] = i;
-    }
+    let mut pref = vec![0, 1];
+    let mut num2pref = vec![0; N];
+    num2pref[xyi[0].2] = 1;
 
-    let mut left = vec![0; N];
-    for (i, &v) in points.iter().enumerate().skip(1) {
-        let u = points[i - 1];
-        if cmp(&(u.1, u.2), &(v.1, v.2)) != Ordering::Equal {
-            left[i] = i;
+    for (&(ux, uy, _), &(x, y, i)) in xyi.iter().zip(xyi.iter().skip(1)) {
+        if cmp(&(ux, uy), &(x, y)) == Ordering::Equal {
+            *pref.last_mut().unwrap() += 1;
         } else {
-            left[i] = left[i - 1]
+            pref.push(1);
         }
+        num2pref[i] = pref.len() - 1;
     }
-
-    let mut right = vec![N - 1; N];
-    for (i, &v) in points.iter().enumerate().rev().skip(1) {
-        let u = points[i + 1];
-        if cmp(&(u.1, u.2), &(v.1, v.2)) != Ordering::Equal {
-            right[i] = i;
-        } else {
-            right[i] = right[i + 1];
-        }
+    for i in 0..pref.len() - 1 {
+        pref[i + 1] += pref[i]
     }
+    // eprintln!("{:?}", xyi);
+    // eprintln!("{:?}", num2pref);
+    // eprintln!("{:?}", pref);
 
     for &(a, b) in AB.iter() {
-        let a = a - 1;
-        let b = b - 1;
-        let pos_u = left[pos[a]];
-        let pos_v = right[pos[b]];
+        let a = num2pref[a - 1];
+        let b = num2pref[b - 1];
 
-        if pos_u <= pos_v {
-            let ans = pos_v - pos_u + 1;
-            println!("{ans}")
+        let ans = if b >= a {
+            pref[b] - pref[a - 1]
         } else {
-            let ans = pos_v + 1 + pos.len() - pos_u;
-            println!("{ans}")
-        }
+            N - (pref[a - 1] - pref[b])
+        };
+
+        println!("{ans}");
     }
 }
