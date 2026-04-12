@@ -1,75 +1,97 @@
 #![allow(non_snake_case)]
 use ac_library::ModInt998244353 as mint;
 use proconio::input;
-use std::collections::HashSet;
 fn main() {
     input! {
         N: usize,
         lr: [(usize, usize); N],
     }
-    // eprintln!("");
-
     /*
     全ての可能性を考える 愚直だと 2 ** N になる。
     a, b のチームのどちらかを考えて最後に2倍すれば一般性を失わない.
     dp らしさを感じる
     l, r の制約の確認を逐次行うことが難しい。　最後にできる人数？, 最もきつい制約を持っておけばよい？
     l でソートして?
+    -> a, b に入り得るものを管理すればよい。
      */
-    let mut ls: Vec<Vec<usize>> = vec![Vec::new(); N + 1];
-    let mut rs = vec![Vec::new(); N + 1];
-    for (i, &(l, r)) in lr.iter().enumerate() {
-        ls[l].push(i);
-        rs[r].push(i);
-    }
 
-    let mut frac = vec![mint::new(1); N + 1];
-    let mut finv = vec![mint::new(1); N + 1];
+    let mut fact = vec![mint::new(1); N + 1];
+    let mut ifact = vec![mint::new(1); N + 1];
 
     for i in 2..=N {
-        frac[i] = frac[i - 1] * mint::new(i);
-        finv[i] = finv[i - 1] / mint::new(i);
+        fact[i] = fact[i - 1] * mint::new(i);
+        ifact[i] = ifact[i - 1] / mint::new(i);
     }
 
-    let mut a = HashSet::new();
-    let mut b = HashSet::new();
-    let mut both = HashSet::new();
+    let mut pref_1 = vec![0i64; N + 2];
+    let mut pref_2 = vec![0i64; N + 2];
+    let mut both = vec![0i64; N + 2];
+    let mut never = vec![0i64; N + 2];
+
+    for &(l1, r1) in lr.iter() {
+        let l2 = N - r1;
+        let r2 = N - l1;
+
+        pref_1[l1] += 1;
+        pref_1[r1 + 1] -= 1;
+
+        pref_2[l2] += 1;
+        pref_2[r2 + 1] -= 1;
+
+        if (l1 <= l2 && l2 <= r1) || (l2 <= l1 && l1 <= r2) {
+            // 区間が重ねっている
+            both[l1.max(l2)] += 1;
+            both[r1.min(r2) + 1] -= 1;
+
+            never[0] += 1;
+            never[l1.min(l2)] -= 1;
+
+            never[r1.max(r2) + 1] += 1;
+            *never.last_mut().unwrap() -= 1;
+        } else {
+            // 区間が重なっていない
+            never[0] += 1;
+            *never.last_mut().unwrap() -= 1;
+            never[l1] -= 1;
+            never[r1 + 1] += 1;
+            never[l2] -= 1;
+            never[r2 + 1] += 1;
+        }
+    }
+
+    for i in 0..=N {
+        pref_1[i + 1] += pref_1[i];
+        pref_2[i + 1] += pref_2[i];
+        both[i + 1] += both[i];
+        never[i + 1] += never[i];
+    }
+
     let mut ans = mint::new(0);
-
-    for (i, j) in (1..N).zip((1..N).rev()) {
-        for l in ls[i].iter() {
-            a.insert(*l);
-            if b.contains(l) {
-                both.insert(*l);
-            }
-        }
-        for r in rs[i - 1].iter() {
-            a.remove(r);
-            both.remove(r);
-        }
-
-        for r in rs[j].iter() {
-            b.insert(*r);
-            if a.contains(r) {
-                both.insert(*r);
-            }
-        }
-        for l in ls[j + 1].iter() {
-            b.remove(l);
-            both.remove(l);
-        }
-        // println!("{i} {j}");
-        // println!("{:?}, {:?}, {:?}", a, b, both);
-
-        let static_a = a.len() - both.len();
-        if static_a > i {
+    for i in 1..N {
+        if never[i] > 0 {
             continue;
         }
-        let to_have = i - static_a;
-        if to_have > both.len() {
+
+        let only_1 = pref_1[i] - both[i];
+        if only_1 > i as i64 {
             continue;
         }
-        ans += frac[both.len()] * finv[to_have] * finv[both.len() - to_have];
+
+        let need_from_both = i as i64 - only_1;
+        if need_from_both > both[i] {
+            continue;
+        }
+        // both C need_from_both
+        let n = both[i] as usize;
+        let r = need_from_both as usize;
+
+        ans += fact[n] * ifact[r] * ifact[n - r];
     }
+
     println!("{ans}");
+
+    // eprintln!("{:?}", pref_1);
+    // eprintln!("{:?}", pref_2);
+    // eprintln!("{:?}", both);
+    // eprintln!("{:?}", never);
 }
