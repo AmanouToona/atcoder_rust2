@@ -1,5 +1,5 @@
 use proconio::input;
-use std::{collections::BTreeMap, ops::Bound::Included, ops::Bound::Unbounded};
+use std::collections::BTreeSet;
 #[allow(non_snake_case)]
 fn main() {
     input! {
@@ -7,45 +7,28 @@ fn main() {
         A: [usize; N],
     }
 
-    let mut map: BTreeMap<usize, usize> = BTreeMap::new();
-
+    let mut set: BTreeSet<usize> = BTreeSet::new();
     let mut ans = 0;
-    let mut right = 0;
-    for left in 0..N {
-        // right はまだ加えられていない
-
-        while right < left {
-            *map.entry(A[right]).or_default() += 1;
-            right += 1;
-        }
-
-        while right < N {
-            let r = A[right];
-            let small = map.range((Unbounded, Included(&r))).next_back();
-            if let Some((&k, _)) = small {
-                if r - k < D {
-                    break;
-                }
-            }
-            let large = map.range((Included(&r), Unbounded)).next();
-            if let Some((&k, _)) = large {
-                if k - r < D {
+    let mut l = 0;
+    for (r, ar) in A.iter().enumerate() {
+        while l < r || l < N {
+            if let Some(low) = set.range(..A[l]).next_back() {
+                if A[l] - low < D {
                     break;
                 }
             }
 
-            *map.entry(r).or_default() += 1;
+            if let Some(large) = set.range(A[l]..).next() {
+                if large - A[l] < D {
+                    break;
+                }
+            }
 
-            right += 1;
+            set.insert(A[l]);
+            l += 1;
         }
-
-        ans += right - left;
-
-        // eprintln!("{left}, {right}, {:?}", map,);
-        *map.entry(A[left]).or_default() -= 1;
-        if map.get(&A[left]) == Some(&0) {
-            map.remove(&A[left]);
-        }
+        ans += l - r;
+        set.remove(ar);
     }
 
     println!("{ans}");
