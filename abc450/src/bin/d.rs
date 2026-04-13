@@ -4,20 +4,18 @@ use std::collections::VecDeque;
 fn main() {
     input! {
         (N, K): (usize, usize),
-         A: [usize; N],
+         mut A: [usize; N],
     }
 
-    let a_max = *A.iter().max().unwrap();
-
-    let mut A: Vec<usize> = A.iter().map(|&a| a + (a_max - a) / K * K).collect();
+    A = A.iter().map(|&x| x % K).collect();
     A.sort();
 
-    let mut normal = VecDeque::from_iter(A.iter().cloned());
-    let mut ans = normal[N - 1] - normal[0];
+    let mut q: VecDeque<usize> = VecDeque::from_iter(A.iter().cloned());
+    let mut ans = A.last().unwrap() - A[0];
     for _ in 0..N {
-        let a = normal.pop_front().unwrap();
-        normal.push_back(a + K);
-        ans = ans.min(normal[N - 1] - normal[0]);
+        ans = ans.min(q.back().unwrap() - q.front().unwrap());
+        let front = q.pop_front().unwrap();
+        q.push_back(front + K);
     }
 
     println!("{ans}");
