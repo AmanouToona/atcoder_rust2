@@ -23,26 +23,14 @@ dp[u][p] = sum dp[v][u] で、 v が存在しないので 0
 最初の点は?
 u をループして親は自分自身とすれば良い
 
+---
+星型で計算量が落とせていない
+前の回答から、回答作成する方針に変更する
+
+
+
+
 */
-
-fn dfs(u: usize, p: usize, g: &[Vec<usize>], dp: &mut [HashMap<usize, (usize, usize)>]) {
-    let mut sum_edge = 0;
-    let mut sum_node = 1;
-    for &v in g[u].iter() {
-        if v == p {
-            continue;
-        }
-
-        if !dp[v].contains_key(&u) {
-            dfs(v, u, g, dp);
-        }
-
-        sum_edge += dp[v].get(&u).unwrap().0;
-        sum_node += dp[v].get(&u).unwrap().1;
-    }
-
-    dp[u].insert(p, (sum_edge + sum_node - 1, sum_node));
-}
 
 fn main() {
     input! {
@@ -56,20 +44,5 @@ fn main() {
         let v = v - 1;
         g[u].push(v);
         g[v].push(u);
-    }
-
-    // dp[u][v] := (親をvとしたときにuから先にたどり着くための合計の距離, vを含めvから先にある頂点の数)
-    let mut dp: Vec<HashMap<usize, (usize, usize)>> = vec![HashMap::new(); N];
-    for u in 0..N {
-        dp[u].insert(u, (0, 1));
-    }
-
-    for u in 0..N {
-        dfs(u, u, &g, &mut dp);
-    }
-
-    for (i, h) in dp.iter().enumerate() {
-        let ans = h.get(&i).unwrap().0;
-        println!("{ans}");
     }
 }
