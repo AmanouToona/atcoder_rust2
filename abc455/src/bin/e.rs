@@ -1,29 +1,64 @@
 #![allow(non_snake_case)]
 use proconio::input;
 use proconio::marker::Chars;
+use std::collections::HashMap;
 
 /*
-# 逆に同じになる文字列の個数を数える？
-同じになる文字列であれば、尺取りっぽくできる... ? いやできない
-CCABAB とかの時、Cが多いからといって、左を進めるとダメになる
-
-- それぞれ管理する？
-
-2文字だったらどする？
-AAAABBBB などをうまく動かす方法はあるか？
-
-* 0　回も重複カウント ... "A" は、B, C が0回だから out
-
-- 差分の管理？
-C - A = - (B - C) - (A - B) なので
-B - C, A - B の個数の2つの状態だけ管理
-もしくは、 A に対して x個多いという情報を管理？ これも2つ
+# 条件を満たさないものをカウントする
 
 */
+
+fn two_char(s1: char, s2: char, S: &Vec<char>) -> i64 {
+    let mut cnt: HashMap<i64, i64> = HashMap::new();
+    cnt.insert(0, 1);
+    let mut c = 0;
+    for &s in S.iter() {
+        if s == s1 {
+            c += 1;
+        } else if s == s2 {
+            c -= 1;
+        }
+        *cnt.entry(c).or_default() += 1;
+    }
+
+    let mut ans = 0;
+    for (_, &v) in cnt.iter() {
+        ans += v * (v - 1) / 2;
+    }
+    ans
+}
 
 fn main() {
     input! {
         N: usize,
         S: Chars,
     }
+
+    let mut ans = ((N + 1) * N / 2) as i64;
+    ans -= two_char('A', 'B', &S);
+    ans -= two_char('A', 'C', &S);
+    ans -= two_char('C', 'B', &S);
+
+    // 引き過ぎている分を戻す
+    let mut cnt: HashMap<(i64, i64), i64> = HashMap::new();
+    cnt.insert((0, 0), 1);
+    let mut cnt_ab = 0;
+    let mut cnt_bc = 0;
+    for &s in S.iter() {
+        if s == 'A' {
+            cnt_ab += 1;
+        } else if s == 'B' {
+            cnt_ab -= 1;
+            cnt_bc += 1;
+        } else {
+            cnt_bc -= 1;
+        }
+        *cnt.entry((cnt_ab, cnt_bc)).or_default() += 1;
+    }
+
+    for (_, &v) in cnt.iter() {
+        ans += v * (v - 1);
+    }
+
+    println!("{ans}");
 }
