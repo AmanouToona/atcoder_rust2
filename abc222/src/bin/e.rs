@@ -80,28 +80,22 @@ fn main() {
     let mut dp = vec![mint::new(0); 200_001];
     dp[0] = mint::new(1);
     for &v in edge_cnt.values() {
-        let mut next = dp.clone();
-        for i in 0..=200_000 {
+        for i in (0..dp.len()).rev() {
             let j = i + v;
-            if j < next.len() {
-                next[j] += dp[i];
+            if j < dp.len() {
+                let prev = dp[i];
+                dp[j] += prev;
             }
         }
-        dp = next;
     }
 
-    let s: usize = edge_cnt.values().cloned().sum::<usize>();
-    if K + (s as i64) < 0 {
-        println!("0");
-        return;
-    }
-    let sum_ks = (K + s as i64) as usize;
-    if sum_ks.is_odd() {
+    let s = edge_cnt.values().cloned().sum::<usize>() as i64;
+    if K + s < 0 || (K + s).is_odd() {
         println!("0");
         return;
     }
 
-    let mut ans = dp[sum_ks / 2];
+    let mut ans = dp[(K + s) as usize / 2];
     // 何色で塗っても良いものを処理
     for _ in 0..N - 1 - edge_cnt.len() {
         ans *= mint::new(2);
