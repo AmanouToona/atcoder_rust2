@@ -20,24 +20,20 @@ use proconio::marker::Chars;
 
 */
 
-fn dfs(u: usize, g: &Vec<Vec<usize>>, seen: &mut Vec<bool>, finished: &mut Vec<bool>) -> bool {
+fn dfs(u: usize, g: &Vec<Vec<usize>>, seen: &mut Vec<bool>, in_path: &mut Vec<bool>) -> bool {
+    seen[u] = true;
+    in_path[u] = true;
+
     for &v in g[u].iter() {
-        if finished[v] {
+        if in_path[v] {
             return true;
         }
 
-        if seen[v] {
-            continue;
-        }
-
-        seen[v] = true;
-        finished[v] = true;
-        if dfs(v, g, seen, finished) {
+        if !seen[v] && dfs(v, g, seen, in_path) {
             return true;
-        };
-
-        finished[v] = false;
+        }
     }
+    in_path[u] = false;
     false
 }
 
@@ -81,9 +77,9 @@ fn main() {
         }
 
         let mut seen = vec![false; N * W];
-        let mut finised = vec![false; N * W];
+        let mut in_path = vec![false; N * W];
         for s in 0..N {
-            if dfs(s * W, &g, &mut seen, &mut finised) {
+            if S[s][0] == 'o' && dfs(s * W, &g, &mut seen, &mut in_path) {
                 println!("Yes");
                 continue 'outer;
             }
