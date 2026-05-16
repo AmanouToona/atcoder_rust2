@@ -1,42 +1,42 @@
 #![allow(non_snake_case)]
-use num::Integer;
 use proconio::input;
+
+/*
+Ai, Ai+1 を組み合わせる貪欲で良いか？
+概ねよいが、一致する色の靴下については一致する色で組み合わせる
+
+使わない靴下はどれか？
+左右から貪欲をして、組み合わせる方法で良い
+
+*/
 fn main() {
     input! {
         (_, K): (usize, usize),
         A: [usize; K],
     }
 
-    let M = K / 2;
-    let mut cost_left = Vec::new();
-    for i in 0..M {
-        cost_left.push(A[i * 2 + 1] - A[i * 2]);
-    }
-    let mut pref_left = vec![0; M + 1];
-    for i in 0..M {
-        pref_left[i + 1] = pref_left[i] + cost_left[i];
+    // 左から i 組み作成
+    let mut left = vec![0];
+    for (&i, &j) in A.iter().step_by(2).zip(A.iter().skip(1).step_by(2)) {
+        left.push(left.last().unwrap() + j - i);
     }
 
-    if A.len().is_even() {
-        println!("{}", pref_left.last().unwrap());
-        return;
-    }
-
-    let mut cost_right = Vec::new();
-    for i in 0..M {
-        cost_right.push(A[i * 2 + 2] - A[i * 2 + 1]);
-    }
-
-    let mut suff_right = vec![0; M + 1];
-    for i in (0..M).rev() {
-        suff_right[i] = suff_right[i + 1] + cost_right[i];
-    }
-
-    let ans: usize = pref_left
+    // 左から i　組み作成
+    let mut right = vec![0];
+    for (&i, &j) in A
         .iter()
-        .zip(suff_right.iter())
-        .map(|x| x.0 + x.1)
-        .min()
-        .unwrap();
+        .rev()
+        .step_by(2)
+        .zip(A.iter().rev().skip(1).step_by(2))
+    {
+        right.push(right.last().unwrap() + i - j);
+    }
+
+    // 合計で片割れ靴下では K / 2 組み作成するので
+    let mut ans = usize::MAX;
+    for (i, &l) in left.iter().enumerate() {
+        ans = ans.min(l + right[K / 2 - i]);
+    }
+
     println!("{ans}");
 }
