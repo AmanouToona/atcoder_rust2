@@ -1,35 +1,43 @@
 #![allow(non_snake_case)]
 use proconio::input;
+
+/*
+レアが i 枚引いた時のパック開封数の期待値を
+dp[i] とする
+1パック開けた時のレアを期待値や確率は算出できる これは計算量 10**4
+0..=100 の各確率を算出する
+
+あとは期待値の dp 解ける
+*/
+
 fn main() {
     input! {
         (N, X): (usize, usize),
         P: [f64; N],
     }
 
-    let P: Vec<f64> = P.iter().map(|x| x / 100.).collect();
-    // K[k] := パッケージを開けた際に、あたりを k 枚引く確率
-    let mut K = vec![0.; N + 1];
-    K[0] = 1.;
-    for p in P.iter() {
-        for j in (0..N).rev() {
-            K[j + 1] += K[j] * p;
-            K[j] *= 1. - p;
+    let mut rare_num: Vec<f64> = vec![0.; N + 1];
+    rare_num[0] = 1.;
+    for &p in P.iter() {
+        let p = p / 100.;
+        for i in (0..N).rev() {
+            rare_num[i + 1] += rare_num[i] * p;
+            rare_num[i] *= 1. - p;
         }
     }
 
-    // dp[x] := x枚のあたりを引いた時のパックの開封個数の期待値
     let mut dp = vec![0.; X + 1];
     for i in (0..X).rev() {
-        let mut tmp = K[0];
-        for (j, k) in K.iter().enumerate().skip(1) {
-            if i + j <= X {
-                tmp += (dp[i + j] + 1.) * k;
+        let mut s = 0.;
+        for j in 1..=N {
+            if j + i <= X {
+                s += (dp[i + j] + 1.) * rare_num[j];
             } else {
-                tmp += 1. * k;
+                s += rare_num[j];
             }
         }
-        dp[i] = tmp / (1. - K[0]);
-    }
 
+        dp[i] = (s + rare_num[0]) / (1. - rare_num[0]);
+    }
     println!("{}", dp[0]);
 }
