@@ -2,111 +2,108 @@
 use amplify::confinement::Collection;
 use proconio::input;
 use std::collections::VecDeque;
+/*
+堀の中にある領域が連結であることが必要
+16マスなので、bit全探索でok
+堀の外が全て結合しているかを確認する
+堀の内側にさらに堀がある状態になっていないことを保証
+*/
 fn main() {
-    /*
-    実は全探索？各辺を使う使わないで... 状態が多いから違う。
-    制約を満たす塀は少ない?
-    dfs で全探索しようとしたが、領域を作るのが大変。
-    bit 全探索に切り替え
-    dsu で結合を確認したが、外周部だけ結合などのケースに対応できない
-    */
     input! {
         A: [[usize; 4]; 4],
     }
 
     let mut ans = 0;
-    'outer: for bit in 0..(1 << 16) {
-        for h in 0..4 {
-            for w in 0..4 {
-                if A[h][w] == 1 && (bit >> (h * 4 + w)) & 1 == 0 {
-                    continue 'outer;
-                }
-            }
-        }
-
-        // bit の 1 の連結性の確認
-        let mut count1 = 0;
+    'outer: for bit in 0..1 << 16 {
+        // 全ての村が堀の中であることを確認
+        let mut map = vec![vec![0; 6]; 6]; // 0: 堀の外, 1: 堀の中
+        let mut cnt1 = 0;
         let mut sh = 0;
         let mut sw = 0;
-        for i in 0..4 {
-            for j in 0..4 {
-                if bit >> (i * 4 + j) & 1 == 1 {
-                    sh = i;
-                    sw = j;
-                    count1 += 1;
-                }
-            }
-        }
-        let count0 = 16 - count1;
+        for i in 0..16 {
+            let h = i / 4;
+            let w = i % 4;
 
-        let mut seen = vec![vec![false; 4]; 4];
-        let mut q = VecDeque::new();
-        let mut seen1 = 0;
-        q.push((sh, sw));
-        while let Some((uh, uw)) = q.pop_front() {
-            if seen[uh][uw] {
+            if bit >> i & 1 == 1 {
+                map[h + 1][w + 1] = 1;
+                sh = h + 1;
+                sw = w + 1;
+                cnt1 += 1;
+            }
+
+            if A[h][w] == 0 {
                 continue;
             }
-            if bit >> (uh * 4 + uw) & 1 == 1 {
-                seen1 += 1;
-            }
-            seen[uh][uw] = true;
-            for &(dh, dw) in [(0, 1), (!0, 0), (0, !0), (1, 0)].iter() {
-                let vh = uh.wrapping_add(dh);
-                let vw = uw.wrapping_add(dw);
 
-                if vh >= 4 || vw >= 4 || bit >> (vh * 4 + vw) & 1 == 0 || seen[vh][vw] {
-                    continue;
-                }
-                q.push((vh, vw));
+            if A[h][w] == 1 && bit >> i & 1 != 1 {
+                continue 'outer;
             }
         }
 
-        if seen1 != count1 {
+        // 堀が連結であることを確認する
+        let d = [(0, 1), (!0, 0), (0, !0), (1, 0)];
+
+        // 堀の中が連結であることを確認する
+        let mut q = VecDeque::new();
+        let mut seen = vec![vec![false; 6]; 6];
+        seen[sh][sw] = true;
+        q.push((sh, sw));
+        while let Some((uh, uw)) = q.pop_front() {
+            for &(dh, dw) in d.iter() {
+                let vh = uh.wrapping_add(dh);
+                let vw = uw.wrapping_add(dw);
+                if vh >= 6 || vw >= 6 {
+                    continue;
+                }
+                if seen[vh][vw] {
+                    continue;
+                }
+                if map[vh][vw] == 1 {
+                    q.push((vh, vw));
+                    seen[vh][vw] = true;
+                }
+            }
+        }
+        if seen
+            .iter()
+            .map(|x| x.iter().map(|x| if *x { 1 } else { 0 }).sum::<usize>())
+            .sum::<usize>()
+            != cnt1
+        {
             continue 'outer;
         }
 
-        // 0 の連結性の確認
+        // 堀が一つであることを確認する
+        let mut q: VecDeque<(usize, usize)> = VecDeque::new();
         let mut seen = vec![vec![false; 6]; 6];
-        let mut q = VecDeque::new();
-        let mut seen0 = 0;
         q.push((0, 0));
         while let Some((uh, uw)) = q.pop_front() {
-            if seen[uh][uw] {
-                continue;
-            }
-
-            seen[uh][uw] = true;
-            if (1..=4).contains(&uh)
-                && (1..=4).contains(&uw)
-                && bit >> ((uh - 1) * 4 + (uw - 1)) & 1 == 0
-            {
-                seen0 += 1;
-            }
-
-            for &(dh, dw) in [(0, 1), (!0, 0), (0, !0), (1, 0)].iter() {
+            for &(dh, dw) in d.iter() {
                 let vh = uh.wrapping_add(dh);
                 let vw = uw.wrapping_add(dw);
-
-                if vh >= 6 || vw >= 6 || seen[vh][vw] {
+                if vh >= 6 || vw >= 6 {
                     continue;
                 }
-                if (1..=4).contains(&vh)
-                    && (1..=4).contains(&vw)
-                    && bit >> ((vh - 1) * 4 + vw - 1) & 1 == 1
-                {
+                if seen[vh][vw] {
                     continue;
                 }
-
-                q.push((vh, vw));
+                if map[vh][vw] == 0 {
+                    q.push((vh, vw));
+                    seen[vh][vw] = true;
+                }
             }
         }
-        if seen0 != count0 {
-            continue;
-        }
 
+        let cnt0 = 6 * 6 - cnt1;
+        if seen
+            .iter()
+            .map(|x| x.iter().map(|x| if *x { 1 } else { 0 }).sum::<usize>())
+            .sum::<usize>()
+            != cnt0
+        {
+            continue 'outer;
+        }
         ans += 1;
     }
-
     println!("{ans}");
 }

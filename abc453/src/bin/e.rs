@@ -1,97 +1,74 @@
 #![allow(non_snake_case)]
 use ac_library::ModInt998244353 as mint;
 use proconio::input;
+
+/*
+N が大きいから全探索ではない
+L, R で全探索もできない
+
+自分の所属していないチームに対する制約は
+[N - r, N - l]
+
+これが [l, r] と重なりを持たないなら、全てを合わせて imos で N になる領域が答えの数だが
+
+*/
+
 fn main() {
     input! {
         N: usize,
         lr: [(usize, usize); N],
     }
-    /*
-    全ての可能性を考える 愚直だと 2 ** N になる。
-    a, b のチームのどちらかを考えて最後に2倍すれば一般性を失わない.
-    dp らしさを感じる
-    l, r の制約の確認を逐次行うことが難しい。　最後にできる人数？, 最もきつい制約を持っておけばよい？
-    l でソートして?
-    -> a, b に入り得るものを管理すればよい。
-     */
 
-    let mut fact = vec![mint::new(1); N + 1];
-    let mut ifact = vec![mint::new(1); N + 1];
+    let max: usize = 2 * 10usize.pow(5);
 
-    for i in 2..=N {
-        fact[i] = fact[i - 1] * mint::new(i);
-        ifact[i] = ifact[i - 1] / mint::new(i);
-    }
+    let mut a: Vec<i64> = vec![0; max + 2];
+    let mut b: Vec<i64> = vec![0; max + 2];
+    let mut ab: Vec<i64> = vec![0; max + 2];
 
-    let mut pref_1 = vec![0i64; N + 2];
-    let mut pref_2 = vec![0i64; N + 2];
-    let mut both = vec![0i64; N + 2];
-    let mut never = vec![0i64; N + 2];
+    for &(l, r) in lr.iter() {
+        a[l] += 1;
+        a[r + 1] -= 1;
 
-    for &(l1, r1) in lr.iter() {
-        let l2 = N - r1;
-        let r2 = N - l1;
+        b[N - r] += 1;
+        b[N - l + 1] -= 1;
 
-        pref_1[l1] += 1;
-        pref_1[r1 + 1] -= 1;
-
-        pref_2[l2] += 1;
-        pref_2[r2 + 1] -= 1;
-
-        if (l1 <= l2 && l2 <= r1) || (l2 <= l1 && l1 <= r2) {
-            // 区間が重ねっている
-            both[l1.max(l2)] += 1;
-            both[r1.min(r2) + 1] -= 1;
-
-            never[0] += 1;
-            never[l1.min(l2)] -= 1;
-
-            never[r1.max(r2) + 1] += 1;
-            *never.last_mut().unwrap() -= 1;
-        } else {
-            // 区間が重なっていない
-            never[0] += 1;
-            *never.last_mut().unwrap() -= 1;
-            never[l1] -= 1;
-            never[r1 + 1] += 1;
-            never[l2] -= 1;
-            never[r2 + 1] += 1;
+        let both_l = l.max(N - r);
+        let both_r = r.min(N - l);
+        if both_l <= both_r {
+            ab[both_l] += 1;
+            ab[both_r + 1] -= 1;
         }
     }
-
-    for i in 0..=N {
-        pref_1[i + 1] += pref_1[i];
-        pref_2[i + 1] += pref_2[i];
-        both[i + 1] += both[i];
-        never[i + 1] += never[i];
+    for i in 0..=max {
+        a[i + 1] += a[i];
+        b[i + 1] += b[i];
+        ab[i + 1] += ab[i];
     }
+
+    let mut frac = vec![mint::new(1); max + 1];
+    for i in 1..=max {
+        frac[i] = frac[i - 1] * mint::new(i)
+    }
+
+    let mut ifrac = vec![mint::new(1); max + 1];
+    ifrac[max] = mint::new(1) / frac[max];
+    for i in (1..=max).rev() {
+        ifrac[i - 1] = ifrac[i] * mint::new(i);
+    }
+
+    let comb = |n: usize, m: usize| {
+        if m > n {
+            return mint::new(0);
+        }
+        frac[n] * ifrac[m] * ifrac[n - m]
+    };
 
     let mut ans = mint::new(0);
     for i in 1..N {
-        if never[i] > 0 {
-            continue;
+        if a[i] + b[i] - ab[i] == N as i64 && i >= (a[i] - ab[i]) as usize {
+            ans += comb(ab[i] as usize, i - (a[i] - ab[i]) as usize)
         }
-
-        let only_1 = pref_1[i] - both[i];
-        if only_1 > i as i64 {
-            continue;
-        }
-
-        let need_from_both = i as i64 - only_1;
-        if need_from_both > both[i] {
-            continue;
-        }
-        // both C need_from_both
-        let n = both[i] as usize;
-        let r = need_from_both as usize;
-
-        ans += fact[n] * ifact[r] * ifact[n - r];
     }
 
     println!("{ans}");
-
-    // eprintln!("{:?}", pref_1);
-    // eprintln!("{:?}", pref_2);
-    // eprintln!("{:?}", both);
-    // eprintln!("{:?}", never);
 }
