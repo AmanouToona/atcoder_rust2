@@ -12,6 +12,7 @@ struct Solve {
     g: Vec<Vec<usize>>,
     c: Vec<usize>,
     d: Vec<usize>,
+    ifrac: Vec<mint>,
 }
 
 impl Solve {
@@ -22,10 +23,22 @@ impl Solve {
             g[p - 1].push(i + 1);
         }
 
+        let mut frac = mint::new(1);
+        for i in 1..=10usize.pow(6) {
+            frac *= mint::new(i);
+        }
+
+        let mut ifrac = vec![mint::new(1); 10usize.pow(6) + 1];
+        ifrac[10usize.pow(6)] = mint::new(1) / frac;
+        for i in (1..=10usize.pow(6)).rev() {
+            ifrac[i - 1] = ifrac[i] * mint::new(i);
+        }
+
         Solve {
             g,
             c: C.to_vec(),
             d: D.to_vec(),
+            ifrac,
         }
     }
 
@@ -49,10 +62,7 @@ impl Solve {
             res *= mint::new(i);
         }
 
-        for i in 1..=m {
-            res /= mint::new(i);
-        }
-        res
+        res * self.ifrac[m]
     }
 }
 
@@ -62,11 +72,6 @@ fn main() {
         P: [usize; N - 1],
         C: [usize; N],
         D: [usize; N],
-    }
-
-    let mut g = vec![Vec::new(); N];
-    for (i, &p) in P.iter().enumerate() {
-        g[p - 1].push(i);
     }
 
     let solve = Solve::new(&P, &C, &D);
