@@ -5,23 +5,23 @@ use proconio::marker::Chars;
 fn main() {
     input! {
         N: usize,
-        S: [Chars; N],
+        S: [Chars; N]
     }
 
-    let f = |c: char| match c {
-        'a' | 'b' | 'c' => '2',
-        'd' | 'e' | 'f' => '3',
-        'g' | 'h' | 'i' => '4',
-        'j' | 'k' | 'l' => '5',
-        'm' | 'n' | 'o' => '6',
-        'p' | 'q' | 'r' | 's' => '7',
-        't' | 'u' | 'v' => '8',
-        'w' | 'x' | 'y' | 'z' => '9',
+    let f = |s: char| match s as u8 - 'a' as u8 {
+        0..=2 => '2',
+        3..=5 => '3',
+        6..=8 => '4',
+        9..=11 => '5',
+        12..=14 => '6',
+        15..=18 => '7',
+        19..=21 => '8',
+        22..=25 => '9',
         _ => {
             panic!()
         }
     };
 
-    let mut ans: String = S.iter().map(|s| f(s[0])).join("");
-    println!("{}", ans);
+    let ans = S.iter().map(|x| f(x[0])).join("");
+    println!("{ans}");
 }

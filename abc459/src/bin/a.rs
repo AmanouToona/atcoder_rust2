@@ -2,17 +2,13 @@
 use itertools::Itertools;
 use proconio::input;
 fn main() {
-    input! {
-        X: usize,
-    }
-
+    input! {X: usize}
     let S: String = "HelloWorld".to_string();
-    let mut ans = Vec::new();
-    for (i, s) in S.chars().enumerate() {
-        if i != X - 1 {
-            ans.push(s);
-        }
-    }
-    let ans: String = ans.iter().join("");
+    let ans = S
+        .chars()
+        .enumerate()
+        .filter(|x| x.0 != X - 1)
+        .map(|x| x.1)
+        .join("");
     println!("{ans}");
 }

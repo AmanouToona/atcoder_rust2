@@ -11,7 +11,6 @@ abc459-d = { alias = "d", problem = "https://atcoder.jp/contests/abc459/tasks/ab
 abc459-e = { alias = "e", problem = "https://atcoder.jp/contests/abc459/tasks/abc459_e" }
 abc459-f = { alias = "f", problem = "https://atcoder.jp/contests/abc459/tasks/abc459_f" }
 abc459-g = { alias = "g", problem = "https://atcoder.jp/contests/abc459/tasks/abc459_g" }
-abc459-h = { alias = "h", problem = "https://atcoder.jp/contests/abc459/tasks/abc459_h" }
 
 [[bin]]
 name = "abc459-a"
@@ -40,10 +39,6 @@ path = "src/bin/f.rs"
 [[bin]]
 name = "abc459-g"
 path = "src/bin/g.rs"
-
-[[bin]]
-name = "abc459-h"
-path = "src/bin/h.rs"
 
 [dependencies]
 # 202301から:
