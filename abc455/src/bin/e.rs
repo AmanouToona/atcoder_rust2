@@ -3,29 +3,24 @@ use proconio::input;
 use proconio::marker::Chars;
 use std::collections::HashMap;
 
-/*
-# 条件を満たさないものをカウントする
+fn cnt_sub(s: &[char], a: char, b: char) -> Vec<i64> {
+    let mut res = vec![0];
 
-*/
-
-fn two_char(s1: char, s2: char, S: &Vec<char>) -> i64 {
-    let mut cnt: HashMap<i64, i64> = HashMap::new();
-    cnt.insert(0, 1);
-    let mut c = 0;
-    for &s in S.iter() {
-        if s == s1 {
-            c += 1;
-        } else if s == s2 {
-            c -= 1;
+    for &s in s.iter() {
+        if s == a {
+            res.push(1);
+        } else if s == b {
+            res.push(-1);
+        } else {
+            res.push(0);
         }
-        *cnt.entry(c).or_default() += 1;
     }
 
-    let mut ans = 0;
-    for (_, &v) in cnt.iter() {
-        ans += v * (v - 1) / 2;
+    for i in 0..s.len() {
+        res[i + 1] += res[i];
     }
-    ans
+
+    res
 }
 
 fn main() {
@@ -34,30 +29,33 @@ fn main() {
         S: Chars,
     }
 
-    let mut ans = ((N + 1) * N / 2) as i64;
-    ans -= two_char('A', 'B', &S);
-    ans -= two_char('A', 'C', &S);
-    ans -= two_char('C', 'B', &S);
+    let a_b = cnt_sub(&S, 'A', 'B');
+    let b_c = cnt_sub(&S, 'B', 'C');
+    let a_c = cnt_sub(&S, 'A', 'C');
 
-    // 引き過ぎている分を戻す
-    let mut cnt: HashMap<(i64, i64), i64> = HashMap::new();
-    cnt.insert((0, 0), 1);
-    let mut cnt_ab = 0;
-    let mut cnt_bc = 0;
-    for &s in S.iter() {
-        if s == 'A' {
-            cnt_ab += 1;
-        } else if s == 'B' {
-            cnt_ab -= 1;
-            cnt_bc += 1;
-        } else {
-            cnt_bc -= 1;
-        }
-        *cnt.entry((cnt_ab, cnt_bc)).or_default() += 1;
+    let mut ans = N * (N + 1) / 2;
+
+    let mut cnt: HashMap<(i64, i64), usize> = HashMap::new();
+    for (&i, &j) in a_b.iter().zip(b_c.iter()) {
+        ans += 2 * (*cnt.get(&(i, j)).unwrap_or(&0));
+        *cnt.entry((i, j)).or_default() += 1;
+    }
+    let mut cnt: HashMap<i64, usize> = HashMap::new();
+    for i in a_b.iter() {
+        ans -= *cnt.get(i).unwrap_or(&0);
+        *cnt.entry(*i).or_default() += 1;
     }
 
-    for (_, &v) in cnt.iter() {
-        ans += v * (v - 1);
+    let mut cnt: HashMap<i64, usize> = HashMap::new();
+    for i in b_c.iter() {
+        ans -= *cnt.get(i).unwrap_or(&0);
+        *cnt.entry(*i).or_default() += 1;
+    }
+
+    let mut cnt: HashMap<i64, usize> = HashMap::new();
+    for i in a_c.iter() {
+        ans -= *cnt.get(i).unwrap_or(&0);
+        *cnt.entry(*i).or_default() += 1;
     }
 
     println!("{ans}");
