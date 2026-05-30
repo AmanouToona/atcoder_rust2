@@ -1,46 +1,56 @@
+#![allow(non_snake_case)]
 use itertools::Itertools;
 use proconio::input;
 use std::collections::BTreeMap;
+/*
+tri木を実装する問題?
 
-fn dfs(u: usize, is: &[Vec<usize>], to: &[BTreeMap<usize, usize>], ans: &mut Vec<usize>) {
-    ans.extend_from_slice(&is[u]);
+必要な構造を整理する
+- node
+    - {次の状態}, {このノードの i}
+- i -> node の逆引き
 
-    for (_, v) in to[u].iter() {
-        dfs(*v, is, to, ans);
+- vec![node]
+- i -> node の vec
+*/
+
+fn dfs(u: usize, node: &Vec<BTreeMap<usize, usize>>, nci: &Vec<Vec<usize>>, ans: &mut Vec<usize>) {
+    ans.extend_from_slice(&nci[u]);
+
+    for &v in node[u].values() {
+        dfs(v, node, nci, ans);
     }
 }
 
-#[allow(non_snake_case)]
 fn main() {
     input! {
         N: usize,
-        xy: [(usize, usize); N]
+        xy: [(usize, usize); N],
     }
 
-    let mut is: Vec<Vec<usize>> = vec![vec![0]]; // node に属する a の番号
-    let mut to: Vec<BTreeMap<usize, usize>> = vec![BTreeMap::new()]; // node の持つ edge
-    let mut vid: Vec<usize> = vec![0; N + 1]; // a -> node
+    let mut node: Vec<BTreeMap<usize, usize>> = vec![BTreeMap::new()];
+    let mut i2node: Vec<usize> = vec![0; N + 1];
+    let mut node_contain_i: Vec<Vec<usize>> = vec![Vec::new()];
 
     for (i, &(x, y)) in xy.iter().enumerate() {
-        let parent = vid[x]; // 親ノードの番号
         let i = i + 1;
 
-        if let Some(nxt) = to[parent].get(&y) {
-            vid[i] = *nxt;
-            is[*nxt].push(i);
+        if let Some(node) = node[i2node[x]].get(&y) {
+            i2node[i] = *node;
+            node_contain_i[*node].push(i);
         } else {
-            let nxt_nid = is.len();
-            is.push(vec![i]);
-            to.push(BTreeMap::new());
-
-            to[parent].insert(y, nxt_nid);
-            vid[i] = nxt_nid;
-        };
+            let len = node.len();
+            node[i2node[x]].insert(y, len);
+            node.push(BTreeMap::new());
+            node_contain_i.push(Vec::new());
+            i2node[i] = node.len() - 1;
+            node_contain_i[i2node[i]].push(i);
+        }
     }
 
-    let mut ans = Vec::new();
-    dfs(0, &is, &to, &mut ans);
+    let mut ans: Vec<usize> = Vec::with_capacity(N);
 
-    let ans: String = ans.iter().skip(1).join(" ");
+    dfs(0, &node, &node_contain_i, &mut ans);
+    let ans: String = ans.iter().join(" ");
     println!("{ans}");
 }
