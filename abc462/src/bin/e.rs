@@ -6,14 +6,15 @@ fn calc_cost(a: usize, b: usize, x: usize, y: usize) -> usize {
 
     cost += a.min(b) * x.min(y) * 2;
 
-    if x >= y {
-        let res = x - y;
-        cost += (res / 2) * (a + b) + (res % 2) * a;
-    } else {
-        let res = y - x;
-        cost += (res / 2) * (a + b) + (res % 2) * b;
-    }
+    let res = x.abs_diff(y);
+    let even = res / 2;
+    let odd = res.div_ceil(2);
 
+    if x >= y {
+        cost += a.min(3 * b) * odd + (b).min(a * 3) * even;
+    } else {
+        cost += a.min(3 * b) * even + b.min(a * 3) * odd;
+    }
     cost
 }
 
@@ -24,43 +25,13 @@ fn main() {
 
     for _ in 0..T {
         input! {
-            (A, B, X, Y): (usize, usize, i64, i64),
+            (a, b, X, Y): (usize, usize, i64, i64),
         }
         let x = X.unsigned_abs() as usize;
         let y = Y.unsigned_abs() as usize;
 
-        if x >= y {
-            let mut min = 0;
-            let mut max = ((x + 2) - y) / 2;
+        let ans = calc_cost(a, b, x, y);
 
-            while max - min > 1 {
-                let mid = (min + max) / 2;
-
-                if calc_cost(A, B, x, y + min * 2) < calc_cost(A, B, x, y + mid * 2) {
-                    max = mid;
-                } else {
-                    min = mid;
-                }
-            }
-
-            let ans = calc_cost(A, B, x, y + min * 2);
-            println!("{ans}");
-        } else {
-            let mut min = 0;
-            let mut max = ((y + 2) - x) / 2;
-
-            while max - min > 1 {
-                let mid = (min + max) / 2;
-
-                if calc_cost(A, B, x + min * 2, y) < calc_cost(A, B, x + mid * 2, y) {
-                    max = mid;
-                } else {
-                    min = mid;
-                }
-            }
-
-            let ans = calc_cost(A, B, x + min * 2, y);
-            println!("{ans}");
-        }
+        println!("{ans}");
     }
 }
