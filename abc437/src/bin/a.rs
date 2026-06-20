@@ -1,5 +1,9 @@
 use proconio::input;
 #[allow(non_snake_case)]
 fn main() {
-    input!{}
+    input! {
+        (A, B): (usize, usize),
+    }
+
+    println!("{}", A * 12 + B);
 }
