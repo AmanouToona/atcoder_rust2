@@ -2,68 +2,65 @@
 use proconio::input;
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
-
 /*
-L..=R に R - L + 1 より多くの数字があったらだめ。
-セグ木でできそうだが、 L, R が 10**9 なので、そのままでは無理。
+可能な限り小さなLに入れる
+- L, Rが小さなボールから処理する
+- L が小さいものは可能な限り小さいところに入れる
+- L で走査
+- 同じLではRが小さい方から入れる
 
-テストケースが 10**5 あるので、O(N) の計算量だと嬉しい.
-
-座標圧縮して左から貪欲に決めていく？
-Lに複数個の弾があった場合の処理が難しい.
-
-L + 1..=R までに含んで大丈夫な球の数を持ち続ける？
-L が重なっても大丈夫 許容量を - していけばいい
-次の L が今の R を超えるなら、今までの制約はクリアしたと考えられる。
-そうでないならば、Rの増分だけ許容量を増やす
-
-この貪欲の保証...ないな
-
-でも、弾が入っている領域を左に寄せていく発想は良さそうに思う
-
----
-入れられる玉で一番Rが小さいものを選択して入れていく
-
+実装
+- L sort
+- i = 0 -> ボールがないなら next L へ skip
+- ボールがあるなら i+= 1, ball pop
+- ball pop の結果(rを取得) i より大きいなら game over
 */
 
 fn main() {
-    input! {
-        T: usize,
-    }
-
+    input! {T: usize}
     'outer: for _ in 0..T {
         input! {
-            N: usize,
-            mut lr: [(usize, usize); N],
+            N:usize,
+            LR: [(usize, usize); N]
         }
 
+        let mut ball_r: BinaryHeap<Reverse<usize>> = BinaryHeap::new();
+        let mut box_cnt = 0;
+        let mut lr = LR.clone();
         lr.sort_by_key(|x| x.0);
 
-        let mut bx = 0; // box
-        let mut iter = lr.iter().peekable();
-        let mut q = BinaryHeap::new();
-        while iter.peek().is_some() || !q.is_empty() {
-            if q.is_empty() {
-                if let Some(&(l, _)) = iter.peek() {
-                    bx = bx.max(*l);
+        let mut lr_iter = lr.iter().peekable();
+
+        while box_cnt <= 1_000_000_000 {
+            while let Some((l, r)) = lr_iter.peek() {
+                if *l <= box_cnt {
+                    lr_iter.next();
+                    ball_r.push(Reverse(*r));
+                } else {
+                    break;
                 }
             }
 
-            while let Some(&(_, r)) = iter.next_if(|(l, _)| *l <= bx) {
-                q.push(Reverse(r));
+            if let Some(Reverse(r)) = ball_r.pop() {
+                if r < box_cnt {
+                    println!("No");
+                    continue 'outer;
+                }
+                box_cnt += 1;
             }
 
-            let Some(Reverse(min)) = q.pop() else {
-                break;
-            };
-
-            if min < bx {
-                println!("No");
-                continue 'outer;
+            if ball_r.is_empty() {
+                if let Some((l, _)) = lr_iter.peek() {
+                    box_cnt = *l;
+                } else {
+                    break;
+                }
             }
-            bx += 1;
         }
-
-        println!("Yes");
+        if ball_r.is_empty() {
+            println!("Yes");
+        } else {
+            println!("No");
+        }
     }
 }
