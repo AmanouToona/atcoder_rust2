@@ -1,26 +1,23 @@
 #![allow(non_snake_case)]
-use proconio::input_interactive;
+use proconio::input;
+
 fn main() {
-    input_interactive!(N: usize);
+    input! {N: usize}
 
-    let mut left = 1;
-    let mut ans = 0;
-    for right in 1..=N {
+    let mut cnt = 0;
+    let mut left = 0;
+    for right in 0..N {
         while left < right {
-            println!("? {left} {right}");
-            input_interactive!(yn: String);
-            let yn = yn.as_str();
-
-            match yn {
-                "No" => {
-                    left += 1;
-                }
-                _ => {
-                    ans += right - left;
-                    break;
-                }
+            println!("? {} {}", left + 1, right + 1);
+            input! {judge: String};
+            if &judge == "Yes" {
+                break;
+            } else {
+                left += 1;
             }
         }
+
+        cnt += right - left;
     }
-    println!("! {ans}");
+    println!("! {cnt}");
 }

@@ -3,18 +3,19 @@ use proconio::input;
 fn main() {
     input! {
         (N, M): (usize, usize),
-        rc: [(usize, usize); M],
+        RC: [(usize, usize); M],
     }
 
-    let mut use_r = vec![false; N + 1];
-    let mut use_c = vec![false; N + 1];
-    let mut ans = 0;
-    for &(r, c) in rc.iter().rev() {
-        if !use_r[r] && !use_c[c] {
-            ans += 1;
+    let mut ignore_row = vec![false; N + 1];
+    let mut ignore_col = vec![false; N + 1];
+    let mut count = 0;
+    for &(r, c) in RC.iter().rev() {
+        if !ignore_col[c] && !ignore_row[r] {
+            count += 1;
         }
-        use_c[c] = true;
-        use_r[r] = true;
+        ignore_col[c] = true;
+        ignore_row[r] = true;
     }
-    println!("{ans}");
+
+    println!("{count}");
 }

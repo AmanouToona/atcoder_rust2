@@ -6,7 +6,7 @@ fn main() {
         X: [i64; N],
     }
 
-    if X.iter().max().unwrap() < &0 {
+    if X.iter().all(|&x| x < 0) {
         println!("Yes");
     } else {
         println!("No");
