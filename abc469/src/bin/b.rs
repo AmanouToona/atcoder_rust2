@@ -1,25 +1,22 @@
 #![allow(non_snake_case)]
+use itertools::izip;
 use proconio::input;
 use proconio::marker::Chars;
 fn main() {
     input! {
-        N: usize,
+        _: usize,
         S: Chars,
     }
 
-    let S: Vec<char> = ['x']
-        .iter()
-        .chain(S.iter())
-        .chain(['x'].iter())
-        .cloned()
-        .collect();
-
-    let mut ans = 0;
-    for ((pre, now), nxt) in S.iter().zip(S.iter().skip(1)).zip(S.iter().skip(2)) {
-        if *now == 'x' && *pre == 'x' && *nxt == 'x' {
-            ans += 1
+    let mut count = 0;
+    for (pre, now, nxt) in izip!(
+        ['x'].iter().chain(S.iter()),
+        S.iter(),
+        S.iter().skip(1).chain(['x'].iter())
+    ) {
+        if *pre == 'x' && *now == 'x' && *nxt == 'x' {
+            count += 1;
         }
     }
-
-    println!("{ans}");
+    println!("{count}");
 }
