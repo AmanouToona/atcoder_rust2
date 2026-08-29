@@ -1,6 +1,4 @@
 #![allow(non_snake_case)]
-use std::{eprintln, println};
-
 use proconio::input;
 use proconio::marker::Chars;
 
@@ -18,6 +16,14 @@ fn main() {
             count_x[i + 1] = count_x[i];
         }
     }
+    // sentinel
+    count_x[N] = usize::MAX;
 
-    eprintln!("{:?}", count_x);
+    let mut ans = 0;
+    for i in 1..=N {
+        while count_x[ans] < i {
+            ans += 1;
+        }
+        println!("{ans}");
+    }
 }
