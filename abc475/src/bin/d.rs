@@ -39,18 +39,31 @@ fn main() {
 
     let primes = eratosthenes(100_000_000);
     for prime in primes {
-        let mut p_pos: HashMap<char, usize> = HashMap::new();
-        let mut p = Vec::new();
+        let mut tmp = prime;
+        let mut digits = Vec::new();
+        while tmp != 0 {
+            digits.push(tmp % 10);
+            tmp /= 10;
+        }
 
-        let prime_string = prime.to_string();
-        if prime_string.len() != s.len() {
+        let digits: Vec<usize> = digits.into_iter().rev().collect();
+
+        if digits.len() != s.len() {
             continue;
         }
-        for digit_char in prime_string.chars() {
-            if !p_pos.contains_key(&digit_char) {
-                p_pos.insert(digit_char, p_pos.len());
+
+        let mut p_pos = [usize::MAX; 10];
+        let mut nxt_id = 0;
+        for &digit in digits.iter() {
+            if p_pos[digit] == usize::MAX {
+                p_pos[digit] = nxt_id;
+                nxt_id += 1;
             }
-            p.push(p_pos[&digit_char]);
+        }
+
+        let mut p = Vec::new();
+        for &digit in digits.iter() {
+            p.push(p_pos[digit]);
         }
 
         if s.len() != p.len() {
