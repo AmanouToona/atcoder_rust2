@@ -8,13 +8,11 @@ fn main() {
     }
 
     let mut ans = Vec::new();
-    for i in 0..S.len() {
-        if i == 0 {
-            ans.push(S[i]);
-        } else {
+    for (i, c) in S.iter().enumerate() {
+        if i != 0 {
             ans.push('o');
-            ans.push(S[i]);
-        }
+        };
+        ans.push(*c);
     }
     let ans: String = ans.iter().join("");
     println!("{ans}");

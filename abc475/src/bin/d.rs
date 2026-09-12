@@ -1,5 +1,4 @@
 #![allow(non_snake_case)]
-use itertools::Itertools;
 use proconio::input;
 use proconio::marker::Chars;
 use std::collections::HashMap;
@@ -30,52 +29,39 @@ fn main() {
     }
 
     let mut s_pos: HashMap<char, usize> = HashMap::new();
-    for s in S.iter() {
-        if s_pos.contains_key(s) {
-            continue;
-        } else {
-            s_pos.insert(*s, s_pos.len());
-        }
-    }
-
-    let mut s_vec: Vec<usize> = Vec::new();
+    let mut s = Vec::new();
     for c in S.iter() {
-        s_vec.push(s_pos[c]);
+        if !s_pos.contains_key(c) {
+            s_pos.insert(*c, s_pos.len());
+        }
+        s.push(s_pos[c]);
     }
 
-    let primes = eratosthenes(100_000_000); // <= 6 * 10 **6 個
-    for p in primes {
-        let p = p.to_string();
-        if p.len() != s_vec.len() {
+    let primes = eratosthenes(100_000_000);
+    for prime in primes {
+        let mut p_pos: HashMap<char, usize> = HashMap::new();
+        let mut p = Vec::new();
+
+        let prime_string = prime.to_string();
+        if prime_string.len() != s.len() {
             continue;
         }
-        let p: Vec<char> = p.chars().collect();
-        let mut p_pos: HashMap<char, usize> = HashMap::new();
-        for s in p.iter() {
-            if p_pos.contains_key(s) {
-                continue;
-            } else {
-                p_pos.insert(*s, p_pos.len());
+        for digit_char in prime_string.chars() {
+            if !p_pos.contains_key(&digit_char) {
+                p_pos.insert(digit_char, p_pos.len());
             }
+            p.push(p_pos[&digit_char]);
         }
 
-        let mut p_vec: Vec<usize> = Vec::new();
-        for c in p.iter() {
-            p_vec.push(p_pos[c]);
+        if s.len() != p.len() {
+            continue;
         }
 
-        let mut is_ans = true;
-        for (p, s) in p_vec.iter().zip(s_vec.iter()) {
-            if p != s {
-                is_ans = false;
-                break;
-            }
-        }
-
-        if is_ans {
-            println!("{}", p.iter().join(""));
+        if s == p {
+            println!("{}", prime);
             return;
         }
     }
-    println!("-1");
+
+    println!("-1")
 }

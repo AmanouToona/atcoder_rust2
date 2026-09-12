@@ -13,48 +13,19 @@ fn main() {
         dist[i + 1] += dist[i];
     }
 
-    let mut ans: usize = 1;
-    for left in 0..=S {
-        let left_dist: usize = dist[left].abs_diff(dist[S]);
-        if left_dist > L {
-            continue;
-        }
+    let mut ans = 1;
+    for l in 0..N {
+        for r in l..N {
+            if l > S || r < S {
+                continue;
+            }
 
-        let mut ll: usize = S;
-        let mut right: usize = N;
-        while right - ll > 1 {
-            let mid: usize = (right + ll) / 2;
-            if left_dist * 2 + dist[mid] - dist[S] > L {
-                right = mid;
-            } else {
-                ll = mid;
+            if (dist[S] - dist[l]) * 2 + (dist[r] - dist[S]) <= L
+                || (dist[S] - dist[l]) + (dist[r] - dist[S]) * 2 <= L
+            {
+                ans = ans.max(r - l + 1);
             }
         }
-        ans = ans.max(ll - left + 1);
-    }
-
-    for right in S..N {
-        let right_dist: usize = dist[right] - dist[S];
-        if right_dist > L {
-            continue;
-        }
-
-        if right_dist * 2 + dist[S] - dist[0] <= L {
-            ans = ans.max(right - 0 + 1);
-        }
-
-        let mut ll: usize = 0;
-        let mut rr: usize = S;
-        while rr - ll > 1 {
-            let mid: usize = (rr + ll) / 2;
-
-            if right_dist * 2 + dist[S] - dist[mid] > L {
-                ll = mid;
-            } else {
-                rr = mid;
-            }
-        }
-        ans = ans.max(right - ll);
     }
 
     println!("{ans}");
