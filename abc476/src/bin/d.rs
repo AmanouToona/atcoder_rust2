@@ -29,13 +29,12 @@ fn main() {
     }
 
     B.sort();
-    let B: Vec<usize> = std::iter::once(0).chain(B.iter().copied()).collect();
 
     let mut ans = 0;
     let mut k_use = 0;
     let mut tot_b = 0;
 
-    for (i, &b) in B.iter().enumerate() {
+    for (i, &b) in std::iter::once(&0).chain(B.iter()).enumerate() {
         k_use += b.div_ceil(K);
         tot_b += b;
 
@@ -45,21 +44,7 @@ fn main() {
 
         let res = X + (Y * K - tot_b);
 
-        let mut left = 0;
-        let mut right = N;
-        if cumsum_a[right] <= res {
-            ans = i + N;
-        } else {
-            while right - left > 1 {
-                let mid = (right + left) / 2;
-                if cumsum_a[mid] > res {
-                    right = mid;
-                } else {
-                    left = mid;
-                }
-            }
-        }
-        ans = ans.max(i + left);
+        ans = ans.max(i + cumsum_a.partition_point(|x| *x <= res) - 1);
     }
 
     println!("{ans}");

@@ -1,13 +1,18 @@
 #![allow(non_snake_case)]
+use itertools::Itertools;
 use proconio::input;
+use proconio::marker::Chars;
 fn main() {
     input! {
-        S: String,
+        S: Chars,
     }
 
-    if S.chars().last().unwrap() != 'e' {
-        println!("{}er", S.to_string());
-    } else {
-        println!("{}r", S.to_string());
+    match S.last() {
+        Some('e') => {
+            println!("{}r", S.iter().join(""));
+        }
+        _ => {
+            println!("{}er", S.iter().join(""));
+        }
     }
 }
