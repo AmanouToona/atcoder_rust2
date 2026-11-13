@@ -7,9 +7,13 @@ use proconio::input;
 
 const UNVISIT: usize = usize::MAX;
 
+/*
+半開区間, [left, right)
+(right - left) is even
+return minimal cost
+*/
 fn small_cost(left: usize, right: usize, dp: &mut [Vec<usize>], a: &[usize]) -> usize {
-    eprintln!("{left} {right}");
-    if left >= right || right - left <= 1 {
+    if left >= right {
         return 0;
     }
 
@@ -22,7 +26,7 @@ fn small_cost(left: usize, right: usize, dp: &mut [Vec<usize>], a: &[usize]) -> 
     }
 
     let mut best = usize::MAX;
-    for i in (left + 1..right).step_by(1) {
+    for i in (left + 1..right).step_by(2) {
         best = best.min(
             a[left].abs_diff(a[i])
                 + small_cost(left + 1, i, dp, a)
